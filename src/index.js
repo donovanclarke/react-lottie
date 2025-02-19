@@ -59,7 +59,6 @@ export default class Lottie extends Component {
       rendererSettings,
       ...options
     };
-    console.log(loadAnimation(this.options));
     this.anim = loadAnimation(this.options);
     this.registerEvents(eventListeners);
   }

@@ -6,15 +6,12 @@ import * as animationDataA from './pinjump.json';
 import * as TwitterHeart from './TwitterHeart.json';
 
 export default {
-    title: 'Lottie/Hook Based',
+    title: 'Lottie/Hook Based Lottie',
     component: Lottie,
     parameters: {
-      // Optional parameter to center the component in the Canvas. More info: https://storybook.js.org/docs/configure/story-layout
       layout: 'centered',
     },
-    // This component will have an automatically generated Autodocs entry: https://storybook.js.org/docs/writing-docs/autodocs
     tags: ['autodocs'],
-    // Use `fn` to spy on the onClick arg, which will appear in the actions panel once invoked: https://storybook.js.org/docs/essentials/actions#action-args
     args: {
         style: { margin: '0px auto' },
         isStopped: false,
@@ -43,6 +40,7 @@ export default {
       display: 'block',
       margin: '10px auto',
       textAlign: 'center',
+      pointer: 'cursor',
     };
     const elementStyle = { margin: "0px auto" };
     const defaultOptions = { animationData: TwitterHeart, loop: false, autoplay: false };
@@ -161,7 +159,7 @@ export default {
     )
   }
 
-  export const LottieExample = {};
+  export const Default = {};
 
   export const Toggle = {
     render: () => <ToggleLottie />
