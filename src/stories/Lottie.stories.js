@@ -46,7 +46,7 @@ export default {
     };
     const elementStyle = { margin: "0px auto" };
     const defaultOptions = { animationData: TwitterHeart, loop: false, autoplay: false };
-    const { isStopped, isPaused, speed, direction } = state;
+    const { isStopped, isPaused, direction } = state;
 
     const clickHandler = () => {
       if (!state.isStopped) {
@@ -72,8 +72,72 @@ export default {
     );
   }
 
+  const LottieSegment = () => {
+    const [state, setState] = useState({
+      isStopped: false,
+      isPaused: false,
+      speed: 1,
+      direction: 1,
+      endFrame: 50,
+    });
+    const [startFrame, setStartFrame] = useState(0);
+    const [endFrame, setEndFrame] = useState(50);
+    const centerStyle = {
+      display: 'block',
+      margin: '10px auto',
+      textAlign: 'center',
+    };
+    const elementStyle = { margin: "0px auto" };
+    const defaultOptions = { animationData: animationDataA };
+    const { isStopped, isPaused, speed, direction } = state;
+
+    const handleSetStartFrame = (event) => {
+      setStartFrame(event.currentTarget.value);
+    }
+
+    const handleSetEndFrame = (event) => {
+      setEndFrame(event.currentTarget.value);
+    }
+    return (
+      <div>
+        <Lottie
+          style={elementStyle}
+          options={defaultOptions}
+          height={100}
+          width={100}
+          isStopped={isStopped}
+          isPaused={isPaused}
+          speed={speed}
+          segments={[startFrame || 0, endFrame || 0]}
+          direction={direction}
+        />
+        <p style={centerStyle}>Speed: x{speed}</p>
+        <input
+          style={centerStyle}
+          type="range" value={speed} min="0" max="3" step="0.5"
+          onChange={e => setState({ speed: e.currentTarget.value })}
+        />
+        <p style={centerStyle}>Segment range: [{startFrame}, {endFrame}]</p>
+        <div style={centerStyle}>
+          <input
+            type="text" value={startFrame}
+            onChange={handleSetStartFrame}
+          />
+          <input
+            type="text" value={endFrame}
+            onChange={handleSetEndFrame}
+          />
+        </div>
+      </div>
+    );
+  }
+
   export const LottieExample = {};
 
   export const Toggle = {
     render: () => <ToggleLottie />
+  };
+
+  export const Segment = {
+    render: () => <LottieSegment />
   };
