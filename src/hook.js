@@ -1,8 +1,8 @@
-import React, { useRef, useMemo, useEffect } from 'react';
+import React, { useRef, useMemo, useEffect, useLayoutEffect } from 'react';
 import PropTypes from 'prop-types';
-import { loadAnimation } from "lottie-web";
+import { loadAnimation } from 'lottie-web';
 
-import { getSize } from "./utils";
+import { getSize } from './utils';
 
 export const Lottie = ({ 
     options,
@@ -34,7 +34,7 @@ export const Lottie = ({
     return {
       width: getSize(width),
       height: getSize(height),
-      outline: "none",
+      outline: 'none',
       ...style,
     }
   }, [width, height, style]);
@@ -86,12 +86,11 @@ export const Lottie = ({
   }, [isStopped, isPaused, segments]);
 
   // handle speed, direction
-  useEffect(() => {
-    if (speed) {
-      loadFunc.current.setSpeed(speed);
-    }
+  useLayoutEffect(() => {
+    if (loadFunc.current) {
+      loadFunc.current.play();
 
-    if (direction) {
+      loadFunc.current.setSpeed(speed);
       loadFunc.current.setDirection(direction);
     }
   }, [speed, direction]);
@@ -99,6 +98,7 @@ export const Lottie = ({
   // handle change of animation
   useEffect(() => {
     if (options.animationData !== previousOptions.current) {
+        console.log('destroyed');
         destroyRegisterEvents(eventListeners);
         loadFunc.current.destroy();
 

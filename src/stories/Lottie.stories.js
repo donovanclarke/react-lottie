@@ -1,8 +1,12 @@
+import React, { useState } from 'react';
+
 import Lottie from '../hook';
+
 import * as animationDataA from './pinjump.json';
+import * as TwitterHeart from './TwitterHeart.json';
 
 export default {
-    title: 'Example/Lottie',
+    title: 'Lottie/Hook Based',
     component: Lottie,
     parameters: {
       // Optional parameter to center the component in the Canvas. More info: https://storybook.js.org/docs/configure/story-layout
@@ -26,4 +30,50 @@ export default {
       },
   };
 
+  const ToggleLottie = () => {
+    const [state, setState] = useState({
+        isStopped: true,
+        isPaused: false,
+        speed: 1,
+        direction: 1,
+        isLike: false,
+      });
+
+    const centerStyle = {
+      display: 'block',
+      margin: '10px auto',
+      textAlign: 'center',
+    };
+    const elementStyle = { margin: "0px auto" };
+    const defaultOptions = { animationData: TwitterHeart, loop: false, autoplay: false };
+    const { isStopped, isPaused, speed, direction } = state;
+
+    const clickHandler = () => {
+      if (!state.isStopped) {
+        setState((prevState) => ({ ...prevState, direction: prevState.direction * -1 }));
+      }
+      setState((prevState) => ({ ...prevState, isStopped: false, isLike: !prevState.isLike }));
+    };
+    
+    return (
+      <div>
+        <Lottie
+          style={elementStyle}
+          options={defaultOptions}
+          height={200}
+          width={200}
+          isStopped={isStopped}
+          isPaused={isPaused}
+          speed={1}
+          direction={direction}
+        />
+        <button style={centerStyle} onClick={clickHandler}>{state.isLike ? 'unlike' : 'like'}</button>
+      </div>
+    );
+  }
+
   export const LottieExample = {};
+
+  export const Toggle = {
+    render: () => <ToggleLottie />
+  };
