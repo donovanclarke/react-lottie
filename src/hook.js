@@ -98,10 +98,10 @@ export const Lottie = ({
   // handle change of animation
   useEffect(() => {
     if (options.animationData !== previousOptions.current) {
-        console.log('destroyed');
         destroyRegisterEvents(eventListeners);
         loadFunc.current.destroy();
 
+        previousOptions.current = options.animationData;
         loadFunc.current = loadAnimation({ ...lottieOptions, container: ref.current });
         registerEvents(eventListeners);
     }

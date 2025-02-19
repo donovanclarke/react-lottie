@@ -132,6 +132,35 @@ export default {
     );
   }
 
+  const LottieAnimation = () => {
+    const [toggle, setToggle] = useState(true);
+    const elementStyle = { margin: "0px auto" };
+
+    const defaultOptions = { 
+      animationData: (toggle ? animationDataA : TwitterHeart) 
+    };
+
+    const handleToggleChange = () => {
+      setToggle((prevState) => !prevState);
+    }
+
+    return (
+      <div>
+        <Lottie
+          style={elementStyle}
+          options={defaultOptions}
+          height={100}
+          width={100}
+          isStopped={false}
+          isPaused={false}
+          speed={1}
+          direction={1}
+        />
+        <button onClick={handleToggleChange}>Toggle Animation</button>
+      </div>
+    )
+  }
+
   export const LottieExample = {};
 
   export const Toggle = {
@@ -140,4 +169,8 @@ export default {
 
   export const Segment = {
     render: () => <LottieSegment />
+  };
+
+  export const ChangeAnimation = {
+    render: () => <LottieAnimation />
   };
