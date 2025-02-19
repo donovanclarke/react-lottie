@@ -30,6 +30,13 @@ export default {
       },
   };
 
+  const centerStyle = {
+    display: 'block',
+    margin: '20px auto',
+    textAlign: 'center',
+  };
+  const elementStyle = { margin: '0px auto' };
+
   const ToggleLottie = () => {
     const [state, setState] = useState({
         isStopped: true,
@@ -39,12 +46,6 @@ export default {
         isLike: false,
       });
 
-    const centerStyle = {
-      display: 'block',
-      margin: '10px auto',
-      textAlign: 'center',
-    };
-    const elementStyle = { margin: "0px auto" };
     const defaultOptions = { animationData: TwitterHeart, loop: false, autoplay: false };
     const { isStopped, isPaused, direction } = state;
 
@@ -82,12 +83,7 @@ export default {
     });
     const [startFrame, setStartFrame] = useState(0);
     const [endFrame, setEndFrame] = useState(50);
-    const centerStyle = {
-      display: 'block',
-      margin: '10px auto',
-      textAlign: 'center',
-    };
-    const elementStyle = { margin: "0px auto" };
+
     const defaultOptions = { animationData: animationDataA };
     const { isStopped, isPaused, speed, direction } = state;
 
@@ -134,7 +130,6 @@ export default {
 
   const LottieAnimation = () => {
     const [toggle, setToggle] = useState(true);
-    const elementStyle = { margin: "0px auto" };
 
     const defaultOptions = { 
       animationData: (toggle ? animationDataA : TwitterHeart) 
@@ -163,12 +158,7 @@ export default {
 
   const LottieLoop = () => {
     const [isTransitioned, setIsTransitioned] = useState(false);
-    const centerStyle = {
-        display: 'block',
-        margin: '10px auto',
-        textAlign: 'center',
-    };
-    const elementStyle = { margin: "0px auto" };
+
     const defaultOptions = {
       animationData: !isTransitioned ? TwitterHeart : BeatingHeart,
       loop: true,
@@ -208,6 +198,36 @@ export default {
     )
   }
 
+  const LottieTransition = () => {
+    const [showLoopedAnimation, setShowLoopedAnimation] = useState(true);
+
+    const animationOptionsWithLoop = {
+      animationData: animationDataA,
+      loop: true,
+    };
+    const animationOptionsWithoutLoop = {
+      animationData: BeatingHeart,
+      loop: false,
+    };
+
+    const clickHandler = () => {
+      setShowLoopedAnimation((prevState) => !prevState);
+    }
+
+    return (
+      <div>
+        <Lottie
+          style={elementStyle}
+          options={showLoopedAnimation ? animationOptionsWithLoop : animationOptionsWithoutLoop}
+          height={200}
+          width={200}
+        />
+        <p style={centerStyle}>This animation is {showLoopedAnimation ? 'looped' : 'not looped'}</p>
+        <button style={centerStyle} onClick={clickHandler}>switch</button>
+      </div>
+    )
+  }
+
   export const Default = {};
 
   export const Toggle = {
@@ -222,6 +242,10 @@ export default {
     render: () => <LottieAnimation />
   };
 
-  export const LottieLoopTransition = {
+  export const LoopTransition = {
     render: () => <LottieLoop />
   };
+
+  export const TransitionOptions = {
+    render: () => <LottieTransition />
+  }
