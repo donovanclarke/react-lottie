@@ -1,0 +1,166 @@
+import React, { useRef, useMemo, useEffect } from 'react';
+import PropTypes from 'prop-types';
+import { loadAnimation } from "lottie-web";
+
+import { getSize } from "./utils";
+
+export const Lottie = ({ 
+    options,
+    eventListeners = [],
+    height,
+    width,
+    renderAs = 'div',
+    isStopped = false,
+    isPaused = false,
+    speed = 1,
+    segments,
+    direction,
+    role = null,
+    ariaLabel = 'animation',
+    isClickToPauseDisabled = false,
+    title = null,
+    style,
+    className = null,
+    tabIndex = 0,
+    ...props
+}) => {
+  const ref = useRef(null);
+  const loadFunc = useRef(null);
+  const previousOptions = useRef(null);
+
+  const Element = renderAs;
+
+  const lottieStyles = useMemo(() => {
+    return {
+      width: getSize(width),
+      height: getSize(height),
+      outline: "none",
+      ...style,
+    }
+  }, [width, height, style]);
+
+  const lottieOptions = useMemo(() => {
+    const {
+      loop,
+      autoplay,
+      animationData,
+      rendererSettings,
+      segments,
+    } = options;
+
+    return {
+      renderer: "svg",
+      loop: loop !== false,
+      autoplay: autoplay !== false,
+      segments: segments !== false,
+      animationData,
+      rendererSettings,
+      ...options
+    };
+  }, [options]);
+
+  // handle initialization
+  useEffect(() => {
+    if (ref.current) {
+      previousOptions.current = options.animationData;
+      loadFunc.current = loadAnimation({ ...lottieOptions, container: ref.current });
+      registerEvents(eventListeners);
+    }
+  }, []);
+
+  // handle pause, stop, segments
+  useEffect(() => {
+    if (isStopped) {
+      return loadFunc.current.stop();
+    }
+
+    if (isPaused) {
+      return loadFunc.current.pause();
+    }
+
+    if (segments) {
+      return loadFunc.current.playSegments(segments);
+    }
+
+    loadFunc.current.play();
+  }, [isStopped, isPaused, segments]);
+
+  // handle speed, direction
+  useEffect(() => {
+    if (speed) {
+      loadFunc.current.setSpeed(speed);
+    }
+
+    if (direction) {
+      loadFunc.current.setDirection(direction);
+    }
+  }, [speed, direction]);
+
+  // handle change of animation
+  useEffect(() => {
+    if (options.animationData !== previousOptions.current) {
+        destroyRegisterEvents(eventListeners);
+        loadFunc.current.destroy();
+
+        loadFunc.current = loadAnimation({ ...lottieOptions, container: ref.current });
+        registerEvents(eventListeners);
+    }
+  }, [options.animationData]);
+
+  const registerEvents = (eventListeners) => {
+    eventListeners.forEach(({ eventName, callback }) => {
+      loadFunc.current.addEventListener(eventName, callback);
+    });
+  }
+
+  const destroyRegisterEvents = (eventListeners) => {
+    eventListeners.forEach(({ eventName, callback }) => {
+      loadFunc.current.removeEventListener(eventName, callback);
+    });
+  }
+
+  // handle click to pause functionality
+  // TODO: refactor
+  const handleClickToPause = () => {
+    if (loadFunc.current.isPaused) {
+      return loadFunc.current.play();
+    }
+
+    loadFunc.current.pause();
+  }
+
+  const onClickHandler = () => {
+    if (!isClickToPauseDisabled) {
+      return () => null;
+    }
+
+    return handleClickToPause();
+  }
+  // end handle click to pause functionality
+
+  return (
+    <Element ref={ref} style={lottieStyles} onClick={onClickHandler} aria-label={ariaLabel} {...props} />
+  ) 
+}
+
+Lottie.PropTypes = {
+  options: PropTypes.object.isRequired,
+  eventListeners: PropTypes.arrayOf(PropTypes.object),
+  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
+  renderAs: PropTypes.oneOf(['div', 'span']),
+  isStopped: PropTypes.bool,
+  isPaused: PropTypes.bool,
+  speed: PropTypes.number,
+  segments: PropTypes.arrayOf(PropTypes.number),
+  direction: PropTypes.number,
+  role: PropTypes.string,
+  ariaLabel: PropTypes.string,
+  isClickToPauseDisabled: PropTypes.bool,
+  title: PropTypes.string,
+  style: PropTypes.object,
+  className: PropTypes.string,
+  tabIndex: PropTypes.number
+}
+
+export default Lottie;
