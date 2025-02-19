@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import Lottie from '../hook';
 
 import * as animationDataA from './pinjump.json';
+import * as BeatingHeart from './beating-heart.json';
 import * as TwitterHeart from './TwitterHeart.json';
 
 export default {
@@ -159,6 +160,53 @@ export default {
     )
   }
 
+  const LottieLoop = () => {
+    const [isTransitioned, setIsTransitioned] = useState(false);
+    const centerStyle = {
+        display: 'block',
+        margin: '10px auto',
+        textAlign: 'center',
+    };
+    const elementStyle = { margin: "0px auto" };
+    const defaultOptions = {
+      animationData: !isTransitioned ? TwitterHeart : BeatingHeart,
+      loop: true,
+      autoplay: true,
+    };
+
+    const transition = () => {
+      setIsTransitioned((prevState) => !prevState);
+    }
+    
+    const clickHandler = () => {
+      setIsTransitioned((prevState) => !prevState);
+    };
+
+    return (
+      <div>
+        <Lottie
+          style={elementStyle}
+          options={defaultOptions}
+          height={200}
+          width={200}
+          eventListeners={
+            !isTransitioned
+              ? [
+                {
+                  eventName: 'loopComplete',
+                  callback: () => transition(),
+                },
+              ]
+              : []
+          }
+        />
+        <button style={centerStyle} onClick={clickHandler}>
+          restart
+        </button>
+      </div>
+    )
+  }
+
   export const Default = {};
 
   export const Toggle = {
@@ -171,4 +219,8 @@ export default {
 
   export const ChangeAnimation = {
     render: () => <LottieAnimation />
+  };
+
+  export const LottieLoopTransition = {
+    render: () => <LottieLoop />
   };
