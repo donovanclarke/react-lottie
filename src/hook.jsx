@@ -1,29 +1,29 @@
-import React, { useRef, useMemo, useEffect, useLayoutEffect } from 'react';
-import PropTypes from 'prop-types';
-import { loadAnimation } from 'lottie-web';
+import React, { useRef, useMemo, useEffect, useLayoutEffect } from "react";
+import PropTypes from "prop-types";
+import { loadAnimation } from "lottie-web";
 
-import { getSize } from './utils';
+import getSize from "./utils";
 
-export const Lottie = ({ 
-    options,
-    eventListeners = [],
-    height,
-    width,
-    renderAs = 'div',
-    isStopped = false,
-    isPaused = false,
-    speed = 1,
-    segments,
-    direction,
-    role = null,
-    ariaLabel = 'animation',
-    isClickToPauseDisabled = false,
-    title = null,
-    style,
-    className = null,
-    tabIndex = 0,
-    ...props
-}) => {
+export function Lottie({
+  options,
+  eventListeners = [],
+  height,
+  width,
+  renderAs = "div",
+  isStopped = false,
+  isPaused = false,
+  speed = 1,
+  segments,
+  direction,
+  role = null,
+  ariaLabel = "animation",
+  isClickToPauseDisabled = false,
+  title = null,
+  style,
+  className = null,
+  tabIndex = 0,
+  ...props
+}) {
   const ref = useRef(null);
   const loadFunc = useRef(null);
   const previousOptions = useRef(null);
@@ -34,19 +34,14 @@ export const Lottie = ({
     return {
       width: getSize(width),
       height: getSize(height),
-      outline: 'none',
+      outline: "none",
       ...style,
-    }
+    };
   }, [width, height, style]);
 
   const lottieOptions = useMemo(() => {
-    const {
-      loop,
-      autoplay,
-      animationData,
-      rendererSettings,
-      segments,
-    } = options;
+    const { loop, autoplay, animationData, rendererSettings, segments } =
+      options;
 
     return {
       renderer: "svg",
@@ -55,7 +50,7 @@ export const Lottie = ({
       segments: segments !== false,
       animationData,
       rendererSettings,
-      ...options
+      ...options,
     };
   }, [options]);
 
@@ -63,7 +58,10 @@ export const Lottie = ({
   useEffect(() => {
     if (ref.current) {
       previousOptions.current = options.animationData;
-      loadFunc.current = loadAnimation({ ...lottieOptions, container: ref.current });
+      loadFunc.current = loadAnimation({
+        ...lottieOptions,
+        container: ref.current,
+      });
       registerEvents(eventListeners);
     }
   }, []);
@@ -98,12 +96,15 @@ export const Lottie = ({
   // handle change of animation
   useEffect(() => {
     if (options.animationData !== previousOptions.current) {
-        destroyRegisterEvents(eventListeners);
-        loadFunc.current.destroy();
+      destroyRegisterEvents(eventListeners);
+      loadFunc.current.destroy();
 
-        previousOptions.current = options.animationData;
-        loadFunc.current = loadAnimation({ ...lottieOptions, container: ref.current });
-        registerEvents(eventListeners);
+      previousOptions.current = options.animationData;
+      loadFunc.current = loadAnimation({
+        ...lottieOptions,
+        container: ref.current,
+      });
+      registerEvents(eventListeners);
     }
   }, [options.animationData]);
 
@@ -111,13 +112,13 @@ export const Lottie = ({
     eventListeners.forEach(({ eventName, callback }) => {
       loadFunc.current.addEventListener(eventName, callback);
     });
-  }
+  };
 
   const destroyRegisterEvents = (eventListeners) => {
     eventListeners.forEach(({ eventName, callback }) => {
       loadFunc.current.removeEventListener(eventName, callback);
     });
-  }
+  };
 
   // handle click to pause functionality
   // TODO: refactor
@@ -127,7 +128,7 @@ export const Lottie = ({
     }
 
     loadFunc.current.pause();
-  }
+  };
 
   const onClickHandler = () => {
     if (!isClickToPauseDisabled) {
@@ -135,12 +136,17 @@ export const Lottie = ({
     }
 
     return handleClickToPause();
-  }
+  };
   // end handle click to pause functionality
 
   return (
-    <Element ref={ref} style={lottieStyles} onClick={onClickHandler} aria-label={ariaLabel} {...props} />
-  ) 
+    <Element
+      ref={ref}
+      style={lottieStyles}
+      onClick={onClickHandler}
+      aria-label={ariaLabel}
+    />
+  );
 }
 
 Lottie.PropTypes = {
@@ -148,7 +154,7 @@ Lottie.PropTypes = {
   eventListeners: PropTypes.arrayOf(PropTypes.object),
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
   width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  renderAs: PropTypes.oneOf(['div', 'span']),
+  renderAs: PropTypes.oneOf(["div", "span"]),
   isStopped: PropTypes.bool,
   isPaused: PropTypes.bool,
   speed: PropTypes.number,
@@ -160,7 +166,7 @@ Lottie.PropTypes = {
   title: PropTypes.string,
   style: PropTypes.object,
   className: PropTypes.string,
-  tabIndex: PropTypes.number
-}
+  tabIndex: PropTypes.number,
+};
 
 export default Lottie;

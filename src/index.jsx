@@ -2,9 +2,16 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { loadAnimation } from "lottie-web";
 
-import { getSize } from "./utils";
+import getSize from "./utils";
 
-export default class Lottie extends Component {
+class Lottie extends Component {
+  constructor(props) {
+    super(props)
+
+    this.ReactLottieRef = React.createRef();
+    this.ReactLottieRef.current = { element: null, options: null, anim: null };
+  }
+
   static propTypes = {
     options: PropTypes.object.isRequired,
     eventListeners: PropTypes.arrayOf(PropTypes.object),
@@ -22,7 +29,7 @@ export default class Lottie extends Component {
     title: PropTypes.string,
     style: PropTypes.object,
     className: PropTypes.string,
-    tabIndex: PropTypes.number
+    tabIndex: PropTypes.number,
   };
 
   static defaultProps = {
@@ -36,41 +43,41 @@ export default class Lottie extends Component {
     isClickToPauseDisabled: false,
     title: null,
     className: null,
-    tabIndex: 0
+    tabIndex: 0,
   };
-  
+
   componentDidMount() {
     const { options, eventListeners } = this.props;
-    const {
-      loop,
-      autoplay,
-      animationData,
-      rendererSettings,
-      segments,
-    } = options;
+    const { loop, autoplay, animationData, rendererSettings, segments } =
+      options;
 
-    this.options = {
-      container: this.el,
+    const createOptions = {
+      container: this.ReactLottieRef.current.element,
       renderer: "svg",
       loop: loop !== false,
       autoplay: autoplay !== false,
       segments: segments !== false,
       animationData,
       rendererSettings,
-      ...options
-    };
-    this.anim = loadAnimation(this.options);
+      ...options,
+    }
+
+    this.setOptions(createOptions);
+    this.ReactLottieRef.current.anim = loadAnimation(this.getOptions());
     this.registerEvents(eventListeners);
   }
 
   componentDidUpdate(nextProps) {
     /* Recreate the animation handle if the data is changed */
     const { eventListeners, isStopped, segments } = this.props;
-    if (this.options.animationData !== nextProps.options.animationData) {
+
+    if (this.getOptions().animationData !== nextProps.options.animationData) {
       this.deRegisterEvents(eventListeners);
       this.destroy();
-      this.options = { ...this.options, ...nextProps.options };
-      this.anim = loadAnimation(this.options);
+
+      const updateOptions = { ...this.ReactLottieRef.current.options, ...nextProps.options };
+      this.setOptions(updateOptions);
+      this.ReactLottieRef.current.anim = loadAnimation(this.getOptions());
       this.registerEvents(nextProps.eventListeners);
     }
 
@@ -90,62 +97,70 @@ export default class Lottie extends Component {
   componentWillUnmount() {
     this.deRegisterEvents(this.props.eventListeners);
     this.destroy();
-    this.options.animationData = null;
-    this.anim = null;
+    this.ReactLottieRef.current.options.animationData = null;
+    this.ReactLottieRef.current.anim = null;
+  }
+
+  setOptions(options) {
+    this.ReactLottieRef.current.options = { ...options };
+  }
+
+  getOptions() {
+    return this.ReactLottieRef.current.options;
   }
 
   setSpeed() {
-    this.anim.setSpeed(this.props.speed);
+    this.ReactLottieRef.current.anim.setSpeed(this.props.speed);
   }
 
   setDirection() {
-    this.anim.setDirection(this.props.direction);
+    this.ReactLottieRef.current.anim.setDirection(this.props.direction);
   }
 
   play() {
-    this.anim.play();
+    this.ReactLottieRef.current.anim.play();
   }
 
   playSegments() {
-    this.anim.playSegments(this.props.segments);
+    this.ReactLottieRef.current.anim.playSegments(this.props.segments);
   }
 
   stop() {
-    this.anim.stop();
+    this.ReactLottieRef.current.anim.stop();
   }
 
   pause() {
-    if (this.props.isPaused && !this.anim.isPaused) {
-      this.anim.pause();
-    } else if (!this.props.isPaused && this.anim.isPaused) {
-      this.anim.pause();
+    if (this.props.isPaused && !this.ReactLottieRef.current.anim.isPaused) {
+      this.ReactLottieRef.current.anim.pause();
+    } else if (!this.props.isPaused && this.ReactLottieRef.current.anim.isPaused) {
+      this.ReactLottieRef.current.anim.pause();
     }
   }
 
   destroy() {
-    this.anim.destroy();
+    this.ReactLottieRef.current.anim.destroy();
   }
 
   registerEvents(eventListeners) {
     eventListeners.forEach(({ eventName, callback }) => {
-      this.anim.addEventListener(eventName, callback);
+      this.ReactLottieRef.current.anim.addEventListener(eventName, callback);
     });
   }
 
   deRegisterEvents(eventListeners) {
     eventListeners.forEach(({ eventName, callback }) => {
-      this.anim.removeEventListener(eventName, callback);
+      this.ReactLottieRef.current.anim.removeEventListener(eventName, callback);
     });
   }
 
-  handleClickToPause = () => {
+  handleClickToPause() {
     // The pause() method is for handling pausing by passing a prop isPaused
     // This method is for handling the ability to pause by clicking on the animation
-    if (this.anim.isPaused) {
-      return this.anim.play();
+    if (this.ReactLottieRef.current.anim.isPaused) {
+      return this.ReactLottieRef.current.anim.play();
     }
-    this.anim.pause();
-  }
+    this.ReactLottieRef.current.anim.pause();
+  };
 
   render() {
     const {
@@ -161,28 +176,35 @@ export default class Lottie extends Component {
       options,
       ...extraProps
     } = this.props;
-    
+
     const lottieStyles = {
       width: getSize(width),
       height: getSize(height),
       outline: "none",
       ...style,
     };
-    const onClickHandler =
-      isClickToPauseDisabled
-        ? () => null
-        : this.handleClickToPause;
+    const onClickHandler = isClickToPauseDisabled
+      ? () => null
+      : this.handleClickToPause;
     const Element = renderAs;
+
     return (
       <Element
-        ref={(c) => {
-          this.el = c;
+        ref={(element) => {
+          this.ReactLottieRef.current.element = element;
         }}
         style={lottieStyles}
         onClick={onClickHandler}
         aria-label={ariaLabel}
+        data-testid="react-lottie"
         {...extraProps}
       />
     );
   }
 }
+
+const LottieWithRef = React.forwardRef((props, ref) => {
+  return <Lottie {...props} ref={ref} />;
+});
+
+export { Lottie, LottieWithRef };
