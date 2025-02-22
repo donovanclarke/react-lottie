@@ -66,7 +66,6 @@ export function Lottie({
 
     return () => {
       destroyRegisterEvents(eventListeners);
-      loadFunc.current.destroy();
 
       loadFunc.current = null;
     }
@@ -103,7 +102,6 @@ export function Lottie({
   useEffect(() => {
     if (options.animationData !== previousOptions.current) {
       destroyRegisterEvents(eventListeners);
-      loadFunc.current.destroy();
 
       previousOptions.current = options.animationData;
       loadFunc.current = loadAnimation({
@@ -124,6 +122,8 @@ export function Lottie({
     eventListeners.forEach(({ eventName, callback }) => {
       loadFunc.current.removeEventListener(eventName, callback);
     });
+
+    return loadFunc.current.destroy();
   };
 
   // handle click to pause functionality
