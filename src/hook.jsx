@@ -64,6 +64,13 @@ export function Lottie({
       });
       registerEvents(eventListeners);
     }
+
+    return () => {
+      destroyRegisterEvents(eventListeners);
+      loadFunc.current.destroy();
+
+      loadFunc.current = null;
+    }
   }, []);
 
   // handle pause, stop, segments
@@ -145,6 +152,7 @@ export function Lottie({
       style={lottieStyles}
       onClick={onClickHandler}
       aria-label={ariaLabel}
+      data-testid="react-lottie"
     />
   );
 }
