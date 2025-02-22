@@ -85,7 +85,7 @@
       "<rootDir>/src"
     ],
     "testMatch": [
-      "<rootDir>/src/**/tests/**/*.jsx"
+      "<rootDir>/src/**/tests/**/*.test.jsx"
     ],
     "transform": {
       "^.+\\.[t|j]sx?$": "babel-jest"
