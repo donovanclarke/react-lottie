@@ -22,7 +22,6 @@ export function Lottie({
   style,
   className = null,
   tabIndex = 0,
-  ...props
 }) {
   const ref = useRef(null);
   const loadFunc = useRef(null);
@@ -45,9 +44,9 @@ export function Lottie({
 
     return {
       renderer: "svg",
-      loop: loop !== false,
-      autoplay: autoplay !== false,
-      segments: segments !== false,
+      loop: loop ?? true,
+      autoplay: autoplay ?? true,
+      segments: segments ?? true,
       animationData,
       rendererSettings,
       ...options,
@@ -150,9 +149,13 @@ export function Lottie({
     <Element
       ref={ref}
       style={lottieStyles}
+      className={className}
       onClick={onClickHandler}
       aria-label={ariaLabel}
       data-testid="react-lottie"
+      role={role}
+      title={title}
+      tabIndex={tabIndex}
     />
   );
 }

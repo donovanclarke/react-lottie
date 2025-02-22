@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import Lottie from "../hook";
+import Lottie from "../Lottie";
 
 import * as animationDataA from "./pinjump.json";
 import * as BeatingHeart from "./beating-heart.json";

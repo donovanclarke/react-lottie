@@ -2,7 +2,7 @@ import React from "react";
 import { render, screen, fireEvent, act, cleanup, waitFor } from "@testing-library/react";
 import { loadAnimation } from 'lottie-web';
 
-import { LottieWithRef, Lottie as ReactLottie, LottieWithRef as ReactLottieWithRef } from "../index";
+import { LottieWithRef, Lottie as ReactLottie, LottieWithRef as ReactLottieWithRef } from "../LottieLegacy";
 import * as pinjump from "../stories/pinjump.json";
 import * as beatingHeart from "../stories/beating-heart.json";
 

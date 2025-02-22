@@ -1,6 +1,6 @@
 import React from "react";
 import { render, screen, fireEvent, act, waitFor } from "@testing-library/react";
-import Lottie from "../hook";
+import Lottie from "../Lottie";
 import { loadAnimation } from "lottie-web";
 
 // Mock the `loadAnimation` function from `lottie-web`
