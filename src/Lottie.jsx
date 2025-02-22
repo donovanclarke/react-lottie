@@ -89,6 +89,7 @@ export function Lottie({
   }, [isStopped, isPaused, segments]);
 
   // handle speed, direction
+  // useLayoutEffect used as it will fire consistently before the browser is painted.
   useLayoutEffect(() => {
     if (loadFunc.current) {
       loadFunc.current.play();
@@ -127,8 +128,11 @@ export function Lottie({
   };
 
   // handle click to pause functionality
-  // TODO: refactor
   const handleClickToPause = () => {
+    if (!isClickToPauseDisabled) {
+      return () => null;
+    }
+
     if (loadFunc.current.isPaused) {
       return loadFunc.current.play();
     }
@@ -136,21 +140,12 @@ export function Lottie({
     loadFunc.current.pause();
   };
 
-  const onClickHandler = () => {
-    if (!isClickToPauseDisabled) {
-      return () => null;
-    }
-
-    return handleClickToPause();
-  };
-  // end handle click to pause functionality
-
   return (
     <Element
       ref={ref}
       style={lottieStyles}
       className={className}
-      onClick={onClickHandler}
+      onClick={handleClickToPause}
       aria-label={ariaLabel}
       data-testid="react-lottie"
       role={role}
