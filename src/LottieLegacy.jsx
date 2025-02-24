@@ -46,7 +46,7 @@ class Lottie extends Component {
     tabIndex: 0,
   };
 
-  componentDidMount() {
+  componentDidMount(nextProps) {
     const { options, eventListeners } = this.props;
     const { loop, autoplay, animationData, rendererSettings, segments } =
       options;
@@ -71,11 +71,11 @@ class Lottie extends Component {
     /* Recreate the animation handle if the data is changed */
     const { eventListeners, isStopped, segments } = this.props;
 
-    if (this.getOptions().animationData !== nextProps.options.animationData) {
+    if (nextProps.options !== this.props.options) {
       this.deRegisterEvents(eventListeners);
       this.destroy();
 
-      const updateOptions = { ...this.ReactLottieRef.current.options, ...nextProps.options };
+      const updateOptions = { ...this.ReactLottieRef.current.options, ...this.props.options };
       this.setOptions(updateOptions);
       this.ReactLottieRef.current.anim = loadAnimation(this.getOptions());
       this.registerEvents(nextProps.eventListeners);
