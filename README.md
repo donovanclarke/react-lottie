@@ -30,12 +30,44 @@ npm install --save react-lottie-wrapper
 ```
 
 ## Usage
+A react functional component example (React 16.8.0+).
 
-Import pinjump.json.json as animation data
+```jsx
+import { useState } from "react";
+import { Lottie } from "react-lottie-wrapper";
+import * as animationData from "./pinjump.json";
+
+const LottieControl = () => {
+  const [isStopped, setIsStopped] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const defaultOptions = {
+    loop: true,
+    autoplay: true, 
+    animationData: animationData.default,
+    rendererSettings: {
+      preserveAspectRatio: "xMidYMid slice"
+    }
+  };
+
+  return (
+    <Lottie 
+      options={defaultOptions}
+      height={400}
+      width={400}
+      isStopped={isStopped}
+      isPaused={isPaused}
+    />
+  )
+}
+```
+A class based example of implementation. Import pinjump.json.json as animation data.
+
+NOTE: We will be deprecating this in future versions. It is advised that you use the functional version provided. You can see an example of the implementation above. 
 
 ```jsx
 import React, { Component } from "react"
-import Lottie from "react-lottie-wrapper";
+import { ReactLottie } from "react-lottie-wrapper";
 import * as animationData from "./pinjump.json"
 
 export default class LottieControl extends Component {
@@ -105,13 +137,10 @@ export default class LottieControl extends Component {
     )
   }
 }
-
 ```
 
 ### props
-The `<Lottie />` Component supports the following properties:
-
-
+The `<Lottie /> and <ReactLottie />` Components supports the following properties:
 
 **options** *required* 
 
