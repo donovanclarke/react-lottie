@@ -1,18 +1,19 @@
 import React, { useState } from "react";
 
-import Lottie from "../Lottie";
+import { ReactLottie as Lottie } from ".";
 
-import * as animationDataA from "./pinjump.json";
-import * as BeatingHeart from "./beating-heart.json";
-import * as TwitterHeart from "./TwitterHeart.json";
+import { PinJump, BeatingHeart, TwitterHeart } from "../stories/assets";
 
 export default {
-  title: "Lottie/Hook Based Lottie",
+  title: "Lottie/Legacy Lottie",
   component: Lottie,
   parameters: {
+    // Optional parameter to center the component in the Canvas. More info: https://storybook.js.org/docs/configure/story-layout
     layout: "centered",
   },
+  // This component will have an automatically generated Autodocs entry: https://storybook.js.org/docs/writing-docs/autodocs
   tags: ["autodocs"],
+  // Use `fn` to spy on the onClick arg, which will appear in the actions panel once invoked: https://storybook.js.org/docs/essentials/actions#action-args
   args: {
     style: { margin: "0px auto" },
     isStopped: false,
@@ -22,15 +23,14 @@ export default {
     speed: 1,
     direction: 1,
     options: {
-      animationData: animationDataA,
+      animationData: PinJump,
     },
-    isClickToPauseDisabled: true,
   },
 };
 
 const centerStyle = {
   display: "block",
-  margin: "10px auto",
+  margin: "20px auto",
   textAlign: "center",
 };
 const elementStyle = { margin: "0px auto" };
@@ -95,7 +95,7 @@ function LottieSegment() {
   const [startFrame, setStartFrame] = useState(0);
   const [endFrame, setEndFrame] = useState(50);
 
-  const defaultOptions = { animationData: animationDataA };
+  const defaultOptions = { animationData: PinJump };
   const { isStopped, isPaused, speed, direction } = state;
 
   const handleSetStartFrame = (event) => {
@@ -141,10 +141,9 @@ function LottieSegment() {
 
 function LottieAnimation() {
   const [toggle, setToggle] = useState(true);
-  const elementStyle = { margin: "0px auto" };
 
   const defaultOptions = {
-    animationData: toggle ? animationDataA : TwitterHeart,
+    animationData: toggle ? PinJump : TwitterHeart,
   };
 
   const handleToggleChange = () => {
@@ -182,8 +181,10 @@ function LottieLoop() {
   };
 
   const clickHandler = () => {
-    setIsTransitioned((prevState) => !prevState);
+    setIsTransitioned((prevState) => prevState);
   };
+
+  console.log(isTransitioned);
 
   return (
     <div>
@@ -214,10 +215,9 @@ function LottieTransition() {
   const [showLoopedAnimation, setShowLoopedAnimation] = useState(true);
 
   const animationOptionsWithLoop = {
-    animationData: animationDataA,
+    animationData: PinJump,
     loop: true,
   };
-
   const animationOptionsWithoutLoop = {
     animationData: BeatingHeart,
     loop: false,
@@ -263,7 +263,7 @@ export const ChangeAnimation = {
   render: () => <LottieAnimation />,
 };
 
-export const LottieLoopTransition = {
+export const LoopTransition = {
   render: () => <LottieLoop />,
 };
 

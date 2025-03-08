@@ -2,7 +2,7 @@ import React, { useRef, useMemo, useEffect, useLayoutEffect } from "react";
 import PropTypes from "prop-types";
 import { loadAnimation } from "lottie-web";
 
-import getSize from "./utils";
+import getSize from "../utils";
 
 export function Lottie({
   options,

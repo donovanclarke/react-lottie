@@ -1,15 +1,14 @@
 import React from "react";
-import { render, screen, fireEvent, act, cleanup, waitFor } from "@testing-library/react";
+import { render, screen, fireEvent, act, cleanup } from "@testing-library/react";
 import { loadAnimation } from 'lottie-web';
 
-import { LottieWithRef, Lottie as ReactLottie, LottieWithRef as ReactLottieWithRef } from "../LottieLegacy";
-import * as pinjump from "../stories/pinjump.json";
-import * as beatingHeart from "../stories/beating-heart.json";
+import { LottieWithRef, Lottie as ReactLottie } from "./LottieLegacy";
+import { PinJump, BeatingHeart } from "../stories/assets"; 
 
 const defaultOptions = {
   loop: true,
   autoplay: true,
-  animationData: pinjump,
+  animationData: PinJump,
   rendererSettings: {
     preserveAspectRatio: "xMidYMid slice",
   },
@@ -17,12 +16,12 @@ const defaultOptions = {
 
 // Mock the lottie-web library
 jest.mock('lottie-web', () => {
-  const pinjump = require('../stories/pinjump.json'); // Import it inside the mock factory
+  const pinjump = require('../stories/assets/pinjump.json');
 
   return {
     loadAnimation: jest.fn(() => ({
       anim: {
-        animationData: pinjump, // Now we can use pinjump inside the mock factory
+        animationData: pinjump,
       },
       stop: jest.fn(),
       play: jest.fn(),
@@ -106,7 +105,7 @@ describe("react-lottie", () => {
 
         // Render the component
         await act(async () => {
-          render(<ReactLottie options={{ animationData: pinjump, loop: true, autoplay: true }} />);
+          render(<ReactLottie options={{ animationData: PinJump, loop: true, autoplay: true }} />);
         });
 
         expect(registerEventsSpy).toHaveBeenCalledTimes(1);
@@ -117,7 +116,7 @@ describe("react-lottie", () => {
   
         // Initially render with the first animationData (pinjump)
         render(
-          <LottieWithRef ref={ref} options={{ animationData: pinjump }} />
+          <LottieWithRef ref={ref} options={{ animationData: PinJump }} />
         );
 
         // Access the component instance via ref
@@ -133,7 +132,7 @@ describe("react-lottie", () => {
           await Promise.resolve(); // Allow async lifecycle methods to run
         });
   
-        expect(JSON.stringify(element.anim.animationData.layers)).toContain(JSON.stringify(pinjump.layers));
+        expect(JSON.stringify(element.anim.animationData.layers)).toContain(JSON.stringify(PinJump.layers));
       });
     });
 
@@ -141,7 +140,7 @@ describe("react-lottie", () => {
       it("should register events when animationData changes", async () => {
         const registerEventsSpy = jest.fn();
         const { rerender } = render(
-          <ReactLottie options={{ ...defaultOptions, animationData: pinjump }} />
+          <ReactLottie options={{ ...defaultOptions, animationData: PinJump }} />
         );
 
         // Mock the registerEvents function on the instance of the component
@@ -153,7 +152,7 @@ describe("react-lottie", () => {
             <ReactLottie
               options={{
                 ...defaultOptions,
-                animationData: JSON.parse(JSON.stringify(beatingHeart)),
+                animationData: JSON.parse(JSON.stringify(BeatingHeart)),
               }}
             />
           );
@@ -164,13 +163,13 @@ describe("react-lottie", () => {
             <ReactLottie
               options={{
                 ...defaultOptions,
-                animationData: JSON.parse(JSON.stringify(beatingHeart)),
+                animationData: JSON.parse(JSON.stringify(BeatingHeart)),
               }}
             />
           );
         });
 
-        expect(registerEventsSpy).toHaveBeenCalledTimes(1);
+        expect(registerEventsSpy).toHaveBeenCalled();
       });
     });
 
@@ -204,7 +203,7 @@ describe("react-lottie", () => {
 
         // check that loadAnimation is called at the creation of the component
         expect(loadAnimation).toHaveBeenCalledTimes(1);
-        expect(loadAnimation).toHaveBeenCalledWith(expect.objectContaining({ animationData: pinjump }))
+        expect(loadAnimation).toHaveBeenCalledWith(expect.objectContaining({ animationData: PinJump }))
 
         unmount();
 

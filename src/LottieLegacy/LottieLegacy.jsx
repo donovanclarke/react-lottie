@@ -2,7 +2,7 @@ import React, { Component } from "react";
 import PropTypes from "prop-types";
 import { loadAnimation } from "lottie-web";
 
-import getSize from "./utils";
+import getSize from "../utils";
 
 class Lottie extends Component {
   constructor(props) {
@@ -46,7 +46,7 @@ class Lottie extends Component {
     tabIndex: 0,
   };
 
-  componentDidMount(nextProps) {
+  componentDidMount() {
     const { options, eventListeners } = this.props;
     const { loop, autoplay, animationData, rendererSettings, segments } =
       options;
@@ -71,7 +71,8 @@ class Lottie extends Component {
     /* Recreate the animation handle if the data is changed */
     const { eventListeners, isStopped, segments } = this.props;
 
-    if (nextProps.options !== this.props.options) {
+    if (nextProps.options.animationData !== this.props.options.animationData) {
+      console.log('update');
       this.deRegisterEvents(eventListeners);
       this.destroy();
 
@@ -102,7 +103,7 @@ class Lottie extends Component {
   }
 
   setOptions(options) {
-    this.ReactLottieRef.current.options = { ...options };
+    this.ReactLottieRef.current.options = { ...this.ReactLottieRef.current.options, ...options };
   }
 
   getOptions() {
