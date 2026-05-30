@@ -1,27 +1,84 @@
 {
-  "parser": "@babel/eslint-parser",
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "ecmaVersion": 2021,
+    "sourceType": "module",
+    "ecmaFeatures": {
+      "jsx": true
+    }
+  },
+  "plugins": ["@typescript-eslint", "react-hooks"],
   "extends": [
     "airbnb",
     "plugin:react/recommended",
+    "plugin:react-hooks/recommended",
+    "plugin:@typescript-eslint/recommended",
     "plugin:prettier/recommended"
   ],
+  "settings": {
+    "import/resolver": {
+      "typescript": {},
+      "node": {
+        "extensions": [".js", ".jsx", ".ts", ".tsx"]
+      }
+    }
+  },
   "env": {
-    // enable all ECMAScript 6 features except for modules
-    // (this automatically sets the ecmaVersion parser option to 6).
     "es6": true,
     "node": true,
     "browser": true,
     "jest": true
   },
   "rules": {
+    "react/prop-types": "off",
+    "react/require-default-props": "off",
+    "react/jsx-props-no-spreading": "off",
+    "react/destructuring-assignment": "off",
+    "react/static-property-placement": "off",
+    "react/sort-comp": "off",
+    "@typescript-eslint/no-unused-vars": [
+      "error",
+      { "ignoreRestSiblings": true, "argsIgnorePattern": "^_" }
+    ],
+    "react/jsx-filename-extension": [
+      "error",
+      { "extensions": [".jsx", ".tsx"] }
+    ],
+    "import/extensions": [
+      "error",
+      "ignorePackages",
+      { "ts": "never", "tsx": "never", "js": "never", "jsx": "never" }
+    ],
     "import/no-extraneous-dependencies": [
       "error",
       {
         "devDependencies": [
-          "**/setupTests.js" // jest setup
+          "**/setupTests.ts",
+          "**/*.test.tsx",
+          "**/*.stories.tsx",
+          "**/*.stories.jsx"
         ],
         "optionalDependencies": false
       }
     ]
-  }
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.ts", "**/*.test.tsx", "src/tests/**"],
+      "rules": {
+        "global-require": "off",
+        "@typescript-eslint/no-require-imports": "off",
+        "jsx-a11y/aria-role": "off",
+        "no-console": "off"
+      }
+    },
+    {
+      "files": ["**/*.stories.jsx", "**/*.stories.tsx"],
+      "rules": {
+        "react/button-has-type": "off",
+        "no-shadow": "off",
+        "no-console": "off"
+      }
+    }
+  ]
 }

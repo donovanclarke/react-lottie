@@ -1,6 +1,6 @@
 {
   "name": "react-lottie-wrapper",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "lottie animation view for React",
   "repository": {
     "type": "git",
@@ -17,10 +17,11 @@
   ],
   "license": "MIT",
   "scripts": {
-    "release": "git add package.json && git commit -m 'chore: bump version number' && standard-version --first-release && git push --follow-tags origin master && npm publish",
-    "prepublish": ". ./.scripts/prepublish.sh",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
+    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "prepare": "npm run build",
+    "release": "git add package.json && git commit -m 'chore: bump version number' && standard-version --first-release && git push --follow-tags origin main && npm publish",
+    "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
+    "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "start": "storybook dev -p 6006",
@@ -33,6 +34,7 @@
     "@babel/plugin-transform-runtime": "^7.26.9",
     "@babel/polyfill": "^7.12.1",
     "@babel/preset-react": "^7.26.3",
+    "@babel/preset-typescript": "^7.29.7",
     "@babel/runtime": "^7.26.9",
     "@chromatic-com/storybook": "^3.2.4",
     "@storybook/addon-essentials": "^8.5.7",
@@ -44,11 +46,16 @@
     "@storybook/test": "^8.5.7",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
+    "@types/react": "^19.2.15",
+    "@types/react-dom": "^19.2.3",
+    "@typescript-eslint/eslint-plugin": "^8.60.0",
+    "@typescript-eslint/parser": "^8.60.0",
     "babel-jest": "^29.7.0",
     "babel-preset-react-app": "^10.1.0",
     "eslint": "^8.2.0",
     "eslint-config-airbnb": "^19.0.4",
     "eslint-config-prettier": "^10.0.1",
+    "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.25.3",
     "eslint-plugin-jsx-a11y": "^6.5.1",
     "eslint-plugin-prettier": "^5.2.3",
@@ -62,16 +69,17 @@
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "standard-version": "^4.4.0",
-    "storybook": "^8.5.7"
+    "storybook": "^8.5.7",
+    "typescript": "^6.0.3"
   },
   "peerDependencies": {
     "react": "^0.14.7 || >=^15.0.0 <= ^19.0.0"
   },
   "dependencies": {
-    "lottie-web": "^5.12.1",
-    "prop-types": "^15.8.1"
+    "lottie-web": "^5.12.1"
   },
   "main": "dist/index.js",
+  "types": "dist/index.d.ts",
   "eslintConfig": {
     "extends": [
       "plugin:storybook/recommended",
@@ -83,16 +91,15 @@
       "<rootDir>/src"
     ],
     "testMatch": [
-      "<rootDir>/src/**/*.test.jsx"
+      "<rootDir>/src/**/*.test.tsx"
     ],
     "transform": {
-      "^.+\\.[t|j]sx?$": "babel-jest"
+      "^.+\\.[jt]sx?$": "babel-jest"
     },
-    "setupFilesAfterEnv": ["<rootDir>/src/setupTests.js"],
-    "testEnvironment": "jest-environment-jsdom",
-    "extensionsToTreatAsEsm": [
-      ".jsx"
+    "setupFilesAfterEnv": [
+      "<rootDir>/src/setupTests.ts"
     ],
+    "testEnvironment": "jest-environment-jsdom",
     "moduleNameMapper": {
       "^lottie-web$": "<rootDir>/src/tests/__mocks__/lottie-web.js"
     }

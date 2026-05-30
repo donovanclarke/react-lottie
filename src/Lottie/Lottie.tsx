@@ -1,8 +1,8 @@
 import React, { useRef, useMemo, useEffect, useLayoutEffect } from "react";
-import PropTypes from "prop-types";
-import { loadAnimation } from "lottie-web";
+import lottie, { AnimationConfigWithData, AnimationItem } from "lottie-web";
 
 import getSize from "../utils";
+import type { LottieEventListener, LottieProps } from "../types";
 
 export function Lottie({
   options,
@@ -22,42 +22,56 @@ export function Lottie({
   style,
   className = null,
   tabIndex = 0,
-}) {
-  const ref = useRef(null);
-  const loadFunc = useRef(null);
-  const previousOptions = useRef(null);
+}: LottieProps) {
+  const ref = useRef<HTMLDivElement>(null);
+  const loadFunc = useRef<AnimationItem | null>(null);
+  const previousOptions = useRef<unknown>(null);
 
-  const Element = renderAs;
+  const Element = renderAs as React.ElementType;
 
-  const lottieStyles = useMemo(() => {
-    return {
+  const lottieStyles = useMemo(
+    () => ({
       width: getSize(width),
       height: getSize(height),
       outline: "none",
       ...style,
-    };
-  }, [width, height, style]);
+    }),
+    [width, height, style],
+  );
 
   const lottieOptions = useMemo(() => {
-    const { loop, autoplay, animationData, rendererSettings, segments } =
-      options;
+    const { loop, autoplay, animationData, rendererSettings } = options;
 
     return {
       renderer: "svg",
       loop: loop ?? true,
       autoplay: autoplay ?? true,
-      segments: segments ?? true,
+      segments: options.segments ?? true,
       animationData,
       rendererSettings,
       ...options,
-    };
+    } as unknown as AnimationConfigWithData;
   }, [options]);
+
+  const registerEvents = (listeners: LottieEventListener[]) => {
+    listeners.forEach(({ eventName, callback }) => {
+      loadFunc.current?.addEventListener(eventName, callback);
+    });
+  };
+
+  const destroyRegisterEvents = (listeners: LottieEventListener[]) => {
+    listeners.forEach(({ eventName, callback }) => {
+      loadFunc.current?.removeEventListener(eventName, callback);
+    });
+
+    loadFunc.current?.destroy();
+  };
 
   // handle initialization
   useEffect(() => {
     if (ref.current) {
       previousOptions.current = options.animationData;
-      loadFunc.current = loadAnimation({
+      loadFunc.current = lottie.loadAnimation({
         ...lottieOptions,
         container: ref.current,
       });
@@ -68,21 +82,29 @@ export function Lottie({
       destroyRegisterEvents(eventListeners);
 
       loadFunc.current = null;
-    }
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // handle pause, stop, segments
   useEffect(() => {
+    if (!loadFunc.current) {
+      return;
+    }
+
     if (isStopped) {
-      return loadFunc.current.stop();
+      loadFunc.current.stop();
+      return;
     }
 
     if (isPaused) {
-      return loadFunc.current.pause();
+      loadFunc.current.pause();
+      return;
     }
 
     if (segments) {
-      return loadFunc.current.playSegments(segments);
+      loadFunc.current.playSegments(segments);
+      return;
     }
 
     loadFunc.current.play();
@@ -93,39 +115,28 @@ export function Lottie({
   useLayoutEffect(() => {
     if (loadFunc.current) {
       loadFunc.current.play();
-
       loadFunc.current.setSpeed(speed);
-      loadFunc.current.setDirection(direction);
+
+      if (direction) {
+        loadFunc.current.setDirection(direction);
+      }
     }
   }, [speed, direction]);
 
   // handle change of animation
   useEffect(() => {
-    if (options.animationData !== previousOptions.current) {
+    if (ref.current && options.animationData !== previousOptions.current) {
       destroyRegisterEvents(eventListeners);
 
       previousOptions.current = options.animationData;
-      loadFunc.current = loadAnimation({
+      loadFunc.current = lottie.loadAnimation({
         ...lottieOptions,
         container: ref.current,
       });
       registerEvents(eventListeners);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [options.animationData]);
-
-  const registerEvents = (eventListeners) => {
-    eventListeners.forEach(({ eventName, callback }) => {
-      loadFunc.current.addEventListener(eventName, callback);
-    });
-  };
-
-  const destroyRegisterEvents = (eventListeners) => {
-    eventListeners.forEach(({ eventName, callback }) => {
-      loadFunc.current.removeEventListener(eventName, callback);
-    });
-
-    return loadFunc.current.destroy();
-  };
 
   // handle click to pause functionality
   const handleClickToPause = () => {
@@ -155,25 +166,5 @@ export function Lottie({
     />
   );
 }
-
-Lottie.propTypes = {
-  options: PropTypes.object.isRequired,
-  eventListeners: PropTypes.arrayOf(PropTypes.object),
-  height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  width: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),
-  renderAs: PropTypes.oneOf(["div", "span"]),
-  isStopped: PropTypes.bool,
-  isPaused: PropTypes.bool,
-  speed: PropTypes.number,
-  segments: PropTypes.arrayOf(PropTypes.number),
-  direction: PropTypes.number,
-  role: PropTypes.string,
-  ariaLabel: PropTypes.string,
-  isClickToPauseDisabled: PropTypes.bool,
-  title: PropTypes.string,
-  style: PropTypes.object,
-  className: PropTypes.string,
-  tabIndex: PropTypes.number,
-};
 
 export default Lottie;
