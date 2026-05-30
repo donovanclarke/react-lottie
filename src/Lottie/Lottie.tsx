@@ -1,33 +1,48 @@
-import React, { useRef, useMemo, useEffect, useLayoutEffect } from "react";
+import React, {
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useMemo,
+  useEffect,
+  useLayoutEffect,
+} from "react";
 import lottie, { AnimationConfigWithData, AnimationItem } from "lottie-web";
 
 import getSize from "../utils";
-import type { LottieEventListener, LottieProps } from "../types";
+import type { LottieEventListener, LottieProps, LottieRef } from "../types";
 
-export function Lottie({
-  options,
-  eventListeners = [],
-  height,
-  width,
-  renderAs = "div",
-  isStopped = false,
-  isPaused = false,
-  speed = 1,
-  segments,
-  direction,
-  role = null,
-  ariaLabel = "animation",
-  isClickToPauseDisabled = false,
-  title = null,
-  style,
-  className = null,
-  tabIndex = 0,
-}: LottieProps) {
-  const ref = useRef<HTMLDivElement>(null);
-  const loadFunc = useRef<AnimationItem | null>(null);
-  const previousOptions = useRef<unknown>(null);
+// Module-scoped so the default keeps a stable identity across renders
+// (an inline `[]` default would be a new array every render and would
+// thrash the effect that re-registers listeners).
+const EMPTY_EVENT_LISTENERS: LottieEventListener[] = [];
+
+export const Lottie = forwardRef<LottieRef, LottieProps>(function Lottie(
+  {
+    options,
+    eventListeners = EMPTY_EVENT_LISTENERS,
+    height,
+    width,
+    renderAs = "div",
+    isStopped = false,
+    isPaused = false,
+    speed = 1,
+    segments,
+    direction,
+    role = null,
+    ariaLabel = "animation",
+    isClickToPauseDisabled = false,
+    title = null,
+    style,
+    className = null,
+    tabIndex = 0,
+  },
+  ref,
+) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const animationRef = useRef<AnimationItem | null>(null);
 
   const Element = renderAs as React.ElementType;
+  const interactive = !isClickToPauseDisabled;
 
   const lottieStyles = useMemo(
     () => ({
@@ -39,132 +54,158 @@ export function Lottie({
     [width, height, style],
   );
 
-  const lottieOptions = useMemo(() => {
-    const { loop, autoplay, animationData, rendererSettings } = options;
-
-    return {
+  const lottieOptions = useMemo(
+    () => ({
       renderer: "svg",
-      loop: loop ?? true,
-      autoplay: autoplay ?? true,
-      segments: options.segments ?? true,
-      animationData,
-      rendererSettings,
+      loop: true,
+      autoplay: true,
       ...options,
-    } as unknown as AnimationConfigWithData;
-  }, [options]);
+    }),
+    [options],
+  );
 
-  const registerEvents = (listeners: LottieEventListener[]) => {
-    listeners.forEach(({ eventName, callback }) => {
-      loadFunc.current?.addEventListener(eventName, callback);
-    });
-  };
+  // Expose an imperative handle so callers can drive the animation directly.
+  useImperativeHandle(
+    ref,
+    () => ({
+      play: () => animationRef.current?.play(),
+      pause: () => animationRef.current?.pause(),
+      stop: () => animationRef.current?.stop(),
+      setSpeed: (value) => animationRef.current?.setSpeed(value),
+      setDirection: (value) => animationRef.current?.setDirection(value),
+      goToAndStop: (value, isFrame) =>
+        animationRef.current?.goToAndStop(value, isFrame),
+      goToAndPlay: (value, isFrame) =>
+        animationRef.current?.goToAndPlay(value, isFrame),
+      playSegments: (value, forceFlag) =>
+        animationRef.current?.playSegments(value, forceFlag),
+      getDuration: (inFrames) => animationRef.current?.getDuration(inFrames),
+      get animation() {
+        return animationRef.current;
+      },
+    }),
+    [],
+  );
 
-  const destroyRegisterEvents = (listeners: LottieEventListener[]) => {
-    listeners.forEach(({ eventName, callback }) => {
-      loadFunc.current?.removeEventListener(eventName, callback);
-    });
-
-    loadFunc.current?.destroy();
-  };
-
-  // handle initialization
+  // Create (and re-create) the animation. Keyed on the animation source and
+  // the listener set: changing `options.animationData` swaps the animation,
+  // and the closed-over `animation` instance is what cleanup destroys, which
+  // keeps this correct under React 18 StrictMode double-invocation.
   useEffect(() => {
-    if (ref.current) {
-      previousOptions.current = options.animationData;
-      loadFunc.current = lottie.loadAnimation({
-        ...lottieOptions,
-        container: ref.current,
-      });
-      registerEvents(eventListeners);
+    if (!containerRef.current) {
+      return undefined;
+    }
+
+    const animation = lottie.loadAnimation({
+      ...lottieOptions,
+      container: containerRef.current,
+    } as AnimationConfigWithData);
+    animationRef.current = animation;
+
+    eventListeners.forEach(({ eventName, callback }) => {
+      animation.addEventListener(eventName, callback);
+    });
+
+    // Apply initial speed/direction here because the layout effect below
+    // runs before this passive effect on mount (no animation yet).
+    animation.setSpeed(speed);
+    if (direction) {
+      animation.setDirection(direction);
     }
 
     return () => {
-      destroyRegisterEvents(eventListeners);
-
-      loadFunc.current = null;
+      eventListeners.forEach(({ eventName, callback }) => {
+        animation.removeEventListener(eventName, callback);
+      });
+      animation.destroy();
+      animationRef.current = null;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [options.animationData, eventListeners]);
 
-  // handle pause, stop, segments
+  // Reflect play/pause/stop/segment props onto the animation.
   useEffect(() => {
-    if (!loadFunc.current) {
+    const animation = animationRef.current;
+    if (!animation) {
       return;
     }
 
     if (isStopped) {
-      loadFunc.current.stop();
+      animation.stop();
       return;
     }
 
     if (isPaused) {
-      loadFunc.current.pause();
+      animation.pause();
       return;
     }
 
     if (segments) {
-      loadFunc.current.playSegments(segments);
+      animation.playSegments(segments);
       return;
     }
 
-    loadFunc.current.play();
+    animation.play();
   }, [isStopped, isPaused, segments]);
 
-  // handle speed, direction
-  // useLayoutEffect used as it will fire consistently before the browser is painted.
+  // Reflect speed/direction changes. useLayoutEffect so the change is applied
+  // before paint. Skips on mount (handled in the create effect above).
   useLayoutEffect(() => {
-    if (loadFunc.current) {
-      loadFunc.current.play();
-      loadFunc.current.setSpeed(speed);
-
-      if (direction) {
-        loadFunc.current.setDirection(direction);
-      }
+    const animation = animationRef.current;
+    if (!animation) {
+      return;
+    }
+    animation.setSpeed(speed);
+    if (direction) {
+      animation.setDirection(direction);
     }
   }, [speed, direction]);
 
-  // handle change of animation
-  useEffect(() => {
-    if (ref.current && options.animationData !== previousOptions.current) {
-      destroyRegisterEvents(eventListeners);
-
-      previousOptions.current = options.animationData;
-      loadFunc.current = lottie.loadAnimation({
-        ...lottieOptions,
-        container: ref.current,
-      });
-      registerEvents(eventListeners);
-    }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [options.animationData]);
-
-  // handle click to pause functionality
-  const handleClickToPause = () => {
-    if (isClickToPauseDisabled || !loadFunc.current) {
+  const togglePlayPause = () => {
+    const animation = animationRef.current;
+    if (!animation) {
       return;
     }
-
-    if (loadFunc.current.isPaused) {
-      loadFunc.current.play();
-      return;
+    if (animation.isPaused) {
+      animation.play();
+    } else {
+      animation.pause();
     }
+  };
 
-    loadFunc.current.pause();
+  const handleClick = () => {
+    if (interactive) {
+      togglePlayPause();
+    }
+  };
+
+  const handleKeyDown = (event: React.KeyboardEvent) => {
+    if (
+      event.key === "Enter" ||
+      event.key === " " ||
+      event.key === "Spacebar"
+    ) {
+      event.preventDefault();
+      togglePlayPause();
+    }
   };
 
   return (
     <Element
-      ref={ref}
+      ref={containerRef}
       style={lottieStyles}
       className={className}
-      onClick={handleClickToPause}
+      onClick={handleClick}
+      onKeyDown={interactive ? handleKeyDown : undefined}
       aria-label={ariaLabel}
       data-testid="react-lottie"
-      role={role}
+      role={role ?? (interactive ? "button" : undefined)}
       title={title}
       tabIndex={tabIndex}
     />
   );
-}
+});
+
+Lottie.displayName = "Lottie";
 
 export default Lottie;

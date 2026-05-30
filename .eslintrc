@@ -68,6 +68,7 @@
       "rules": {
         "global-require": "off",
         "@typescript-eslint/no-require-imports": "off",
+        "@typescript-eslint/no-explicit-any": "off",
         "jsx-a11y/aria-role": "off",
         "no-console": "off"
       }

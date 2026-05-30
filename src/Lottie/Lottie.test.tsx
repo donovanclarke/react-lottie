@@ -6,8 +6,11 @@ import {
   act,
   waitFor,
 } from "@testing-library/react";
-import { loadAnimation } from "lottie-web";
+import lottie, { AnimationSegment } from "lottie-web";
 import Lottie from "./Lottie";
+import type { LottieEventListener, LottieOptions, LottieRef } from "../types";
+
+const loadAnimation = lottie.loadAnimation as unknown as jest.Mock;
 
 // Mock the `loadAnimation` function from `lottie-web`
 jest.mock("lottie-web", () => ({
@@ -18,6 +21,9 @@ jest.mock("lottie-web", () => ({
     setSpeed: jest.fn(),
     setDirection: jest.fn(),
     playSegments: jest.fn(),
+    goToAndStop: jest.fn(),
+    goToAndPlay: jest.fn(),
+    getDuration: jest.fn(),
     isPaused: false,
     destroy: jest.fn(),
     addEventListener: jest.fn(),
@@ -26,7 +32,7 @@ jest.mock("lottie-web", () => ({
 }));
 
 describe("Lottie Component", () => {
-  let mockOptions;
+  let mockOptions: LottieOptions;
 
   beforeEach(() => {
     // Reset mocks
@@ -89,7 +95,7 @@ describe("Lottie Component", () => {
     lottieInstanceMock.pause.mockClear();
 
     act(() => {
-      fireEvent.click(lottieInstance);
+      fireEvent.click(lottieInstance as Element);
     });
 
     // the mock reports isPaused: false, so clicking should pause it
@@ -106,14 +112,14 @@ describe("Lottie Component", () => {
     lottieInstanceMock.pause.mockClear();
 
     act(() => {
-      fireEvent.click(lottieInstance);
+      fireEvent.click(lottieInstance as Element);
     });
 
     expect(lottieInstanceMock.pause).not.toHaveBeenCalled();
   });
 
   it("should call playSegments when segments are passed", () => {
-    const segments = [0, 50];
+    const segments: AnimationSegment = [0, 50];
     render(<Lottie options={mockOptions} segments={segments} />);
     const lottieInstanceMock = loadAnimation.mock.results[0].value;
 
@@ -161,7 +167,7 @@ describe("Lottie Component", () => {
   });
 
   it("should handle event listeners correctly", () => {
-    const eventListeners = [
+    const eventListeners: LottieEventListener[] = [
       { eventName: "complete", callback: jest.fn() },
       { eventName: "loopComplete", callback: jest.fn() },
     ];
@@ -181,7 +187,7 @@ describe("Lottie Component", () => {
   });
 
   it("should clean up event listeners on destroy", () => {
-    const eventListeners = [
+    const eventListeners: LottieEventListener[] = [
       { eventName: "complete", callback: jest.fn() },
       { eventName: "loopComplete", callback: jest.fn() },
     ];
@@ -195,5 +201,22 @@ describe("Lottie Component", () => {
     unmount();
 
     expect(lottieInstanceMock.removeEventListener).toHaveBeenCalledTimes(2);
+  });
+
+  it("exposes an imperative handle via ref", () => {
+    const ref = React.createRef<LottieRef>();
+    render(<Lottie ref={ref} options={mockOptions} />);
+    const lottieInstanceMock = loadAnimation.mock.results[0].value;
+
+    act(() => {
+      ref.current?.play();
+      ref.current?.setSpeed(3);
+      ref.current?.goToAndStop(10, true);
+    });
+
+    expect(lottieInstanceMock.play).toHaveBeenCalled();
+    expect(lottieInstanceMock.setSpeed).toHaveBeenCalledWith(3);
+    expect(lottieInstanceMock.goToAndStop).toHaveBeenCalledWith(10, true);
+    expect(ref.current?.animation).toBe(lottieInstanceMock);
   });
 });

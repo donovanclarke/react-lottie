@@ -3,9 +3,10 @@
   "version": "2.1.0",
   "description": "lottie animation view for React",
   "packageManager": "npm@10.9.3",
+  "type": "commonjs",
   "repository": {
     "type": "git",
-    "url": "https://github.com/donovanclarke/react-lottie"
+    "url": "git+https://github.com/donovanclarke/react-lottie.git"
   },
   "files": [
     "dist"
@@ -18,15 +19,18 @@
   ],
   "license": "MIT",
   "scripts": {
-    "build": "rm -rf dist && tsc -p tsconfig.build.json",
+    "build": "tsup",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
     "prepare": "npm run build",
-    "release": "git add package.json && git commit -m 'chore: bump version number' && standard-version --first-release && git push --follow-tags origin main && npm publish",
     "lint": "eslint src --ext .js,.jsx,.ts,.tsx",
     "lint:fix": "eslint src --ext .js,.jsx,.ts,.tsx --fix",
     "test": "jest",
     "test:watch": "jest --watchAll",
     "start": "storybook dev -p 6006",
-    "build-storybook": "storybook build"
+    "build-storybook": "storybook build",
+    "changeset": "changeset",
+    "version-packages": "changeset version",
+    "release": "npm run build && changeset publish"
   },
   "devDependencies": {
     "@babel/cli": "^7.26.4",
@@ -37,6 +41,7 @@
     "@babel/preset-react": "^7.26.3",
     "@babel/preset-typescript": "^7.29.7",
     "@babel/runtime": "^7.26.9",
+    "@changesets/cli": "^2.31.0",
     "@chromatic-com/storybook": "^3.2.4",
     "@storybook/addon-essentials": "^8.5.7",
     "@storybook/addon-interactions": "^8.5.7",
@@ -47,6 +52,8 @@
     "@storybook/test": "^8.5.7",
     "@testing-library/jest-dom": "^6.6.3",
     "@testing-library/react": "^16.2.0",
+    "@types/jest": "^30.0.0",
+    "@types/node": "^25.9.1",
     "@types/react": "^19.2.15",
     "@types/react-dom": "^19.2.3",
     "@typescript-eslint/eslint-plugin": "^8.60.0",
@@ -67,20 +74,44 @@
     "jest": "^29.7.0",
     "jest-environment-jsdom": "^29.7.0",
     "jsdom": "^9.5.0",
+    "prettier": "^3.8.3",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "standard-version": "^4.4.0",
     "storybook": "^8.5.7",
+    "tsup": "^8.5.1",
     "typescript": "^6.0.3"
   },
   "peerDependencies": {
-    "react": "^0.14.7 || >=^15.0.0 <= ^19.0.0"
+    "react": ">=16.8.0"
   },
   "dependencies": {
     "lottie-web": "^5.12.1"
   },
   "main": "dist/index.js",
+  "module": "dist/index.mjs",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.mts",
+        "default": "./dist/index.mjs"
+      },
+      "require": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      }
+    },
+    "./package.json": "./package.json"
+  },
+  "sideEffects": false,
+  "engines": {
+    "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public",
+    "provenance": true
+  },
   "eslintConfig": {
     "extends": [
       "plugin:storybook/recommended",

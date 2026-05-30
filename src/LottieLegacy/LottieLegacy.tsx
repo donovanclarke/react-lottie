@@ -31,15 +31,13 @@ class Lottie extends Component<LottieProps> {
 
   componentDidMount() {
     const { options, eventListeners } = this.props;
-    const { loop, autoplay, animationData, rendererSettings, segments } =
-      options;
+    const { loop, autoplay, animationData, rendererSettings } = options;
 
     const createOptions = {
       container: this.ReactLottieRef.current.element,
       renderer: "svg",
       loop: loop !== false,
       autoplay: autoplay !== false,
-      segments: segments !== false,
       animationData,
       rendererSettings,
       ...options,

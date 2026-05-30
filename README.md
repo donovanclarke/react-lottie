@@ -29,7 +29,7 @@ Install through npm:
 npm install --save react-lottie-wrapper
 ```
 
-> **TypeScript:** Type definitions are bundled with the package — there is no need to install a separate `@types/...`. The exported types `LottieProps`, `LottieOptions`, and `LottieEventListener` are available from `react-lottie-wrapper`.
+> **TypeScript:** Type definitions are bundled with the package (ESM + CJS) — there is no need to install a separate `@types/...`. The exported types `LottieProps`, `LottieOptions`, `LottieEventListener`, and `LottieRef` are available from `react-lottie-wrapper`.
 
 ## Exports
 
@@ -71,6 +71,33 @@ const LottieControl = () => {
   )
 }
 ```
+### Imperative control with a ref
+
+Pass a `ref` to drive the animation directly:
+
+```jsx
+import { useRef } from "react";
+import { Lottie } from "react-lottie-wrapper";
+import * as animationData from "./pinjump.json";
+
+const Player = () => {
+  const lottieRef = useRef(null);
+
+  return (
+    <>
+      <Lottie ref={lottieRef} options={{ animationData: animationData.default }} />
+      <button type="button" onClick={() => lottieRef.current?.play()}>play</button>
+      <button type="button" onClick={() => lottieRef.current?.pause()}>pause</button>
+      <button type="button" onClick={() => lottieRef.current?.setSpeed(2)}>2x</button>
+    </>
+  );
+};
+```
+
+The ref exposes `play`, `pause`, `stop`, `setSpeed`, `setDirection`,
+`goToAndStop`, `goToAndPlay`, `playSegments`, `getDuration`, and the underlying
+`animation` instance. (TypeScript: `useRef<LottieRef>(null)`.)
+
 A class based example of implementation. Import pinjump.json.json as animation data.
 
 NOTE: We will be deprecating this in future versions. It is advised that you use the functional version provided. You can see an example of the implementation above. 
@@ -203,7 +230,9 @@ Should animation begin to play automatically.
 
 **isClickToPauseDisabled** *optional* [default: `false`]
 
-Disables click event to pause the animation.
+Disables click-to-pause. When enabled (the default), clicking the animation
+toggles play/pause, and the container also responds to `Enter`/`Space` and
+exposes `role="button"` for keyboard accessibility.
 
 **isStopped** *optional* [default: `false`]
 
@@ -233,7 +262,7 @@ Set the direction of the animation. `1` plays forward, `-1` plays in reverse.
 
 Play a specific segment (or array of segments) of the animation, e.g. `[0, 50]`.
 
-**role** *optional* [default: `null`]
+**role** *optional* [default: `null`, or `"button"` when click-to-pause is enabled]
 
 **ariaLabel** *optional* [default: `animation`]
 

@@ -6,10 +6,12 @@ import {
   act,
   cleanup,
 } from "@testing-library/react";
-import { loadAnimation } from "lottie-web";
+import lottie from "lottie-web";
 
 import { LottieWithRef, Lottie as ReactLottie } from "./LottieLegacy";
 import { PinJump, BeatingHeart } from "../stories/assets";
+
+const loadAnimation = lottie.loadAnimation as unknown as jest.Mock;
 
 const defaultOptions = {
   loop: true,
@@ -22,7 +24,7 @@ const defaultOptions = {
 
 // Mock the lottie-web library
 jest.mock("lottie-web", () => {
-  const pinjump = require("../stories/assets/pinjump.json");
+  const pinjump = jest.requireActual("../stories/assets/pinjump.json");
 
   return {
     loadAnimation: jest.fn(() => ({
@@ -81,7 +83,7 @@ describe("react-lottie", () => {
         const divElement = screen.getByTestId("react-lottie");
 
         expect(divElement).toHaveAttribute("aria-label", "testlabel");
-        expect(divElement).toHaveAttribute(("title", "title"));
+        expect(divElement).toHaveAttribute("title", "title");
       });
     });
 
@@ -123,7 +125,7 @@ describe("react-lottie", () => {
       });
 
       it("should load the animation", async () => {
-        const ref = React.createRef();
+        const ref = React.createRef<ReactLottie>();
 
         // Initially render with the first animationData (pinjump)
         render(
@@ -132,8 +134,9 @@ describe("react-lottie", () => {
 
         // Access the component instance via ref
         const componentInstance = ref.current;
-        // Access the ref's element, which was assigned in componentDidMount
-        const element = componentInstance?.ReactLottieRef?.current?.anim;
+        // Access the ref's element, which was assigned in componentDidMount.
+        // Typed `any` because this asserts against the test mock's shape.
+        const element: any = componentInstance?.ReactLottieRef?.current?.anim;
 
         // Ensure anim is properly initialized
         expect(element).toHaveProperty("anim");
@@ -144,7 +147,7 @@ describe("react-lottie", () => {
         });
 
         expect(JSON.stringify(element.anim.animationData.layers)).toContain(
-          JSON.stringify(PinJump.layers),
+          JSON.stringify((PinJump as { layers: unknown }).layers),
         );
       });
     });
