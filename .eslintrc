@@ -1,8 +1,8 @@
 {
-  "parser": "babel-eslint",
+  "parser": "@babel/eslint-parser",
   "extends": [
     "airbnb",
-    "prettier/react",
+    "plugin:react/recommended",
     "plugin:prettier/recommended"
   ],
   "env": {
@@ -12,5 +12,16 @@
     "node": true,
     "browser": true,
     "jest": true
+  },
+  "rules": {
+    "import/no-extraneous-dependencies": [
+      "error",
+      {
+        "devDependencies": [
+          "**/setupTests.js" // jest setup
+        ],
+        "optionalDependencies": false
+      }
+    ]
   }
 }
