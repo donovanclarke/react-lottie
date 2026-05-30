@@ -1,8 +1,4 @@
-import Lottie from "./Lottie";
-import { Lottie as ReactLottie, LottieWithRef as ReactLottieWithRef } from "./LottieLegacy";
+import { Lottie } from "./Lottie";
+import { ReactLottie, ReactLottieWithRef } from "./LottieLegacy";
 
-export {
-  Lottie,
-  ReactLottie,
-  ReactLottieWithRef
-}
+export { Lottie, ReactLottie, ReactLottieWithRef };

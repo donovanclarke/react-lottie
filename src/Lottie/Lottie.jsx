@@ -129,12 +129,13 @@ export function Lottie({
 
   // handle click to pause functionality
   const handleClickToPause = () => {
-    if (!isClickToPauseDisabled) {
-      return () => null;
+    if (isClickToPauseDisabled || !loadFunc.current) {
+      return;
     }
 
     if (loadFunc.current.isPaused) {
-      return loadFunc.current.play();
+      loadFunc.current.play();
+      return;
     }
 
     loadFunc.current.pause();
@@ -155,7 +156,7 @@ export function Lottie({
   );
 }
 
-Lottie.PropTypes = {
+Lottie.propTypes = {
   options: PropTypes.object.isRequired,
   eventListeners: PropTypes.arrayOf(PropTypes.object),
   height: PropTypes.oneOfType([PropTypes.string, PropTypes.number]),

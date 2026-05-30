@@ -1,3 +1,2 @@
-import Lottie from "./Lottie";
-
-export { Lottie };
+// eslint-disable-next-line import/prefer-default-export
+export { Lottie } from "./Lottie";

@@ -72,7 +72,6 @@ class Lottie extends Component {
     const { eventListeners, isStopped, segments } = this.props;
 
     if (nextProps.options.animationData !== this.props.options.animationData) {
-      console.log('update');
       this.deRegisterEvents(eventListeners);
       this.destroy();
 

@@ -53,40 +53,57 @@ describe("Lottie Component", () => {
     expect(element).toHaveStyle("height: 200px");
   });
 
-  it("should call play when isPaused is false", () => {
-    const { container } = render(<Lottie options={mockOptions} isPaused={false} />);
-    const lottieInstance = container.firstChild;
+  it("should play the animation on mount when not paused or stopped", () => {
+    render(<Lottie options={mockOptions} />);
     const lottieInstanceMock = loadAnimation.mock.results[0].value;
 
-    act(() => {
-      fireEvent.click(lottieInstance);
-    });
-
-    expect(lottieInstanceMock.play).toHaveBeenCalledTimes(1);
+    expect(lottieInstanceMock.play).toHaveBeenCalled();
   });
 
-  it("should call pause when isPaused is true", () => {
-    const { container } = render(<Lottie options={mockOptions} isPaused={true} />);
-    const lottieInstance = container.firstChild;
+  it("should pause the animation when isPaused is true", () => {
+    render(<Lottie options={mockOptions} isPaused={true} />);
     const lottieInstanceMock = loadAnimation.mock.results[0].value;
 
-    act(() => {
-      fireEvent.click(lottieInstance);
-    });
-
-    expect(lottieInstanceMock.pause).toHaveBeenCalledTimes(1);
+    expect(lottieInstanceMock.pause).toHaveBeenCalled();
   });
 
   it("should stop the animation when isStopped is true", () => {
-    const { container } = render(<Lottie options={mockOptions} isStopped={true} />);
+    render(<Lottie options={mockOptions} isStopped={true} />);
+    const lottieInstanceMock = loadAnimation.mock.results[0].value;
+
+    expect(lottieInstanceMock.stop).toHaveBeenCalled();
+  });
+
+  it("should toggle playback on click when click-to-pause is enabled", () => {
+    const { container } = render(<Lottie options={mockOptions} />);
     const lottieInstance = container.firstChild;
     const lottieInstanceMock = loadAnimation.mock.results[0].value;
+
+    // ignore any play/pause calls made during the mount effects
+    lottieInstanceMock.pause.mockClear();
 
     act(() => {
       fireEvent.click(lottieInstance);
     });
 
-    expect(lottieInstanceMock.stop).toHaveBeenCalledTimes(1);
+    // the mock reports isPaused: false, so clicking should pause it
+    expect(lottieInstanceMock.pause).toHaveBeenCalledTimes(1);
+  });
+
+  it("should not toggle playback on click when click-to-pause is disabled", () => {
+    const { container } = render(
+      <Lottie options={mockOptions} isClickToPauseDisabled={true} />
+    );
+    const lottieInstance = container.firstChild;
+    const lottieInstanceMock = loadAnimation.mock.results[0].value;
+
+    lottieInstanceMock.pause.mockClear();
+
+    act(() => {
+      fireEvent.click(lottieInstance);
+    });
+
+    expect(lottieInstanceMock.pause).not.toHaveBeenCalled();
   });
 
   it("should call playSegments when segments are passed", () => {
