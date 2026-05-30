@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  quality:
+    name: lint · typecheck · build
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        node: [18, 20]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node }}
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npm run lint
+      - run: npm run typecheck
+      - run: npm run build
+
+  test:
+    name: test (React ${{ matrix.react }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      # @testing-library/react v16 supports React 18 and 19, so the test
+      # harness runs against those. React 16.8 / 17 are still supported by the
+      # public API (hooks) and the peer range; they just aren't exercised by
+      # this RTL-based suite.
+      matrix:
+        react: ["18", "19"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+      - run: npm ci --legacy-peer-deps
+      - run: npm install --no-save --legacy-peer-deps react@${{ matrix.react }} react-dom@${{ matrix.react }}
+      - run: npm test

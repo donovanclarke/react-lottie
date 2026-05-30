@@ -1,9 +1,17 @@
 import React from "react";
-import { render, screen, fireEvent, act, cleanup } from "@testing-library/react";
-import { loadAnimation } from 'lottie-web';
+import {
+  render,
+  screen,
+  fireEvent,
+  act,
+  cleanup,
+} from "@testing-library/react";
+import lottie from "lottie-web";
 
 import { LottieWithRef, Lottie as ReactLottie } from "./LottieLegacy";
-import { PinJump, BeatingHeart } from "../stories/assets"; 
+import { PinJump, BeatingHeart } from "../stories/assets";
+
+const loadAnimation = lottie.loadAnimation as unknown as jest.Mock;
 
 const defaultOptions = {
   loop: true,
@@ -15,8 +23,8 @@ const defaultOptions = {
 };
 
 // Mock the lottie-web library
-jest.mock('lottie-web', () => {
-  const pinjump = require('../stories/assets/pinjump.json');
+jest.mock("lottie-web", () => {
+  const pinjump = jest.requireActual("../stories/assets/pinjump.json");
 
   return {
     loadAnimation: jest.fn(() => ({
@@ -33,7 +41,6 @@ jest.mock('lottie-web', () => {
   };
 });
 
-
 describe("react-lottie", () => {
   describe("props", () => {
     describe("isClickToPauseDisabled", () => {
@@ -43,17 +50,19 @@ describe("react-lottie", () => {
         ReactLottie.prototype.handleClickToPause = handleClickToPauseSpy;
 
         const { rerender } = render(<ReactLottie options={defaultOptions} />);
-      
+
         // Get the div element from the rendered component
         const div = screen.getByTestId("react-lottie");
-      
+
         // Click the div and check if the spy was called
         fireEvent.click(div);
         expect(handleClickToPauseSpy).toHaveBeenCalledTimes(1); // Expect it to be called once
-      
+
         // Rerender the component with `isClickToPauseDisabled` prop set to true
-        rerender(<ReactLottie options={defaultOptions} isClickToPauseDisabled />);
-      
+        rerender(
+          <ReactLottie options={defaultOptions} isClickToPauseDisabled />,
+        );
+
         // Click again and check if the spy is still called the same number of times
         fireEvent.click(div);
         expect(handleClickToPauseSpy).toHaveBeenCalledTimes(1); // Expect it to NOT be called again
@@ -68,23 +77,23 @@ describe("react-lottie", () => {
             role="test"
             ariaLabel="testlabel"
             title="title"
-          />
+          />,
         );
 
-        const divElement = screen.getByTestId('react-lottie');
+        const divElement = screen.getByTestId("react-lottie");
 
         expect(divElement).toHaveAttribute("aria-label", "testlabel");
-        expect(divElement).toHaveAttribute(("title", "title"));
+        expect(divElement).toHaveAttribute("title", "title");
       });
     });
 
     describe("height and width", () => {
       it("should set the inline styles correctly", () => {
         render(
-          <ReactLottie options={defaultOptions} height={199} width={188} />
+          <ReactLottie options={defaultOptions} height={199} width={188} />,
         );
 
-        const divElement = screen.getByTestId('react-lottie');
+        const divElement = screen.getByTestId("react-lottie");
 
         expect(divElement).toHaveStyle("width: 188px");
         expect(divElement).toHaveStyle("height: 199px");
@@ -105,34 +114,41 @@ describe("react-lottie", () => {
 
         // Render the component
         await act(async () => {
-          render(<ReactLottie options={{ animationData: PinJump, loop: true, autoplay: true }} />);
+          render(
+            <ReactLottie
+              options={{ animationData: PinJump, loop: true, autoplay: true }}
+            />,
+          );
         });
 
         expect(registerEventsSpy).toHaveBeenCalledTimes(1);
       });
 
       it("should load the animation", async () => {
-        const ref = React.createRef();
-  
+        const ref = React.createRef<ReactLottie>();
+
         // Initially render with the first animationData (pinjump)
         render(
-          <LottieWithRef ref={ref} options={{ animationData: PinJump }} />
+          <LottieWithRef ref={ref} options={{ animationData: PinJump }} />,
         );
 
         // Access the component instance via ref
         const componentInstance = ref.current;
-        // Access the ref's element, which was assigned in componentDidMount
-        const element = componentInstance?.ReactLottieRef?.current?.anim;
+        // Access the ref's element, which was assigned in componentDidMount.
+        // Typed `any` because this asserts against the test mock's shape.
+        const element: any = componentInstance?.ReactLottieRef?.current?.anim;
 
         // Ensure anim is properly initialized
-        expect(element).toHaveProperty('anim');
-        expect(element.anim).toHaveProperty('animationData');
+        expect(element).toHaveProperty("anim");
+        expect(element.anim).toHaveProperty("animationData");
         await act(async () => {
           // Ensures the component has mounted and componentDidMount has been called
           await Promise.resolve(); // Allow async lifecycle methods to run
         });
-  
-        expect(JSON.stringify(element.anim.animationData.layers)).toContain(JSON.stringify(PinJump.layers));
+
+        expect(JSON.stringify(element.anim.animationData.layers)).toContain(
+          JSON.stringify((PinJump as { layers: unknown }).layers),
+        );
       });
     });
 
@@ -140,7 +156,9 @@ describe("react-lottie", () => {
       it("should register events when animationData changes", async () => {
         const registerEventsSpy = jest.fn();
         const { rerender } = render(
-          <ReactLottie options={{ ...defaultOptions, animationData: PinJump }} />
+          <ReactLottie
+            options={{ ...defaultOptions, animationData: PinJump }}
+          />,
         );
 
         // Mock the registerEvents function on the instance of the component
@@ -154,7 +172,7 @@ describe("react-lottie", () => {
                 ...defaultOptions,
                 animationData: JSON.parse(JSON.stringify(BeatingHeart)),
               }}
-            />
+            />,
           );
         });
 
@@ -165,7 +183,7 @@ describe("react-lottie", () => {
                 ...defaultOptions,
                 animationData: JSON.parse(JSON.stringify(BeatingHeart)),
               }}
-            />
+            />,
           );
         });
 
@@ -177,9 +195,7 @@ describe("react-lottie", () => {
       it("should de-register events", async () => {
         const deRegisterEventsSpy = jest.fn();
 
-        const { unmount } = render(
-          <ReactLottie options={defaultOptions} />
-        );
+        const { unmount } = render(<ReactLottie options={defaultOptions} />);
 
         const instance = ReactLottie.prototype;
         instance.deRegisterEvents = deRegisterEventsSpy;
@@ -197,13 +213,13 @@ describe("react-lottie", () => {
         ReactLottie.prototype.deRegisterEvents = deRegisterEventsSpy;
         ReactLottie.prototype.destroy = destroySpy;
 
-        const { unmount } = render(
-          <ReactLottie options={defaultOptions} />
-        )
+        const { unmount } = render(<ReactLottie options={defaultOptions} />);
 
         // check that loadAnimation is called at the creation of the component
         expect(loadAnimation).toHaveBeenCalledTimes(1);
-        expect(loadAnimation).toHaveBeenCalledWith(expect.objectContaining({ animationData: PinJump }))
+        expect(loadAnimation).toHaveBeenCalledWith(
+          expect.objectContaining({ animationData: PinJump }),
+        );
 
         unmount();
 

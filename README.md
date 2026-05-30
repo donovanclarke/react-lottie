@@ -3,7 +3,7 @@
 ## Demo
 https://github.com/donovanclarke/react-lottie
 
-## Wapper of bodymovin.js
+## Wrapper of bodymovin.js
 
 [bodymovin](https://github.com/bodymovin/bodymovin) is [Adobe After Effects](http://www.adobe.com/products/aftereffects.html) plugin for exporting animations as JSON, also it provide bodymovin.js for render them as svg/canvas/html.
 
@@ -28,6 +28,20 @@ Install through npm:
 ```
 npm install --save react-lottie-wrapper
 ```
+
+> **TypeScript:** Type definitions are bundled with the package (ESM + CJS) — there is no need to install a separate `@types/...`. The exported types `LottieProps`, `LottieOptions`, `LottieEventListener`, and `LottieRef` are available from `react-lottie-wrapper`.
+
+## Exports
+
+The package exports three components:
+
+- **`Lottie`** — the modern hooks-based component (recommended).
+- **`ReactLottie`** — the legacy class-based component. **Deprecated since v2.1; will be removed in v3.**
+- **`ReactLottieWithRef`** — the legacy class component wrapped with `forwardRef`. **Deprecated since v2.1; will be removed in v3.**
+
+> The legacy class components now emit a one-time deprecation warning in
+> development and are marked `@deprecated` for editors/TypeScript. New code
+> should use `Lottie` (it supports refs — see below). See [MIGRATION.md](./MIGRATION.md).
 
 ## Usage
 A react functional component example (React 16.8.0+).
@@ -61,6 +75,33 @@ const LottieControl = () => {
   )
 }
 ```
+### Imperative control with a ref
+
+Pass a `ref` to drive the animation directly:
+
+```jsx
+import { useRef } from "react";
+import { Lottie } from "react-lottie-wrapper";
+import * as animationData from "./pinjump.json";
+
+const Player = () => {
+  const lottieRef = useRef(null);
+
+  return (
+    <>
+      <Lottie ref={lottieRef} options={{ animationData: animationData.default }} />
+      <button type="button" onClick={() => lottieRef.current?.play()}>play</button>
+      <button type="button" onClick={() => lottieRef.current?.pause()}>pause</button>
+      <button type="button" onClick={() => lottieRef.current?.setSpeed(2)}>2x</button>
+    </>
+  );
+};
+```
+
+The ref exposes `play`, `pause`, `stop`, `setSpeed`, `setDirection`,
+`goToAndStop`, `goToAndPlay`, `playSegments`, `getDuration`, and the underlying
+`animation` instance. (TypeScript: `useRef<LottieRef>(null)`.)
+
 A class based example of implementation. Import pinjump.json.json as animation data.
 
 NOTE: We will be deprecating this in future versions. It is advised that you use the functional version provided. You can see an example of the implementation above. 
@@ -108,7 +149,7 @@ export default class LottieControl extends Component {
 
     return (
       <>
-        <Lottie 
+        <ReactLottie
           options={defaultOptions}
           height={400}
           width={400}
@@ -116,20 +157,23 @@ export default class LottieControl extends Component {
           isPaused={isPaused}
         />
         <button
+          type="button"
           style={buttonStyle}
-          onClick={this.handleAnimationAction("stop", true)}
+          onClick={() => this.handleAnimationAction("stop", true)}
         >
           stop
         </button>
         <button
+          type="button"
           style={buttonStyle}
-          onClick={this.handleAnimationAction("play", false)}
+          onClick={() => this.handleAnimationAction("play", false)}
         >
           play
         </button>
-        <button 
+        <button
+          type="button"
           style={buttonStyle}
-          onClick={this.handleAnimationAction("pause")}
+          onClick={() => this.handleAnimationAction("pause")}
         >
           pause
         </button>
@@ -146,7 +190,7 @@ The `<Lottie /> and <ReactLottie />` Components supports the following propertie
 
 **animationData** *required*
 
-**rendererSettings** *required* 
+**rendererSettings** *optional* 
 
 Below are a the available options that are exposed through lottie-web,
 these options are available in react-lottie-wrapper.
@@ -176,21 +220,23 @@ You are given the option of either a `div` or `span` element.
 
 Insert inline styling for container.
 
-**className** *optional* [default: `""`]
+**className** *optional* [default: `null`]
 
 Insert class name for container.
 
-**loop** *optional* [default: `false`]
+**loop** *optional* [default: `true`]
 
 Should animation loop.
 
-**autoplay** *optional* [default: `false`]
+**autoplay** *optional* [default: `true`]
 
 Should animation begin to play automatically.
 
 **isClickToPauseDisabled** *optional* [default: `false`]
 
-Disables click event to pause the animation.
+Disables click-to-pause. When enabled (the default), clicking the animation
+toggles play/pause, and the container also responds to `Enter`/`Space` and
+exposes `role="button"` for keyboard accessibility.
 
 **isStopped** *optional* [default: `false`]
 
@@ -212,11 +258,19 @@ Pixel value for containers height.
 
 Set the speed of the animation (`normal === 1`).
 
-**role** *optional* [default: `button`]
+**direction** *optional*
+
+Set the direction of the animation. `1` plays forward, `-1` plays in reverse.
+
+**segments** *optional*
+
+Play a specific segment (or array of segments) of the animation, e.g. `[0, 50]`.
+
+**role** *optional* [default: `null`, or `"button"` when click-to-pause is enabled]
 
 **ariaLabel** *optional* [default: `animation`]
 
-**title** *optional* [default: `""`]
+**title** *optional* [default: `null`]
 
 **tabIndex** *optional* [default: `0`]
 

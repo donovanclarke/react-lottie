@@ -4,4 +4,12 @@ We welcome your help to make this component better. This document will help to s
 
 ## Development Setup
 
-This component has been setup with [React CDK](https://github.com/kadirahq/react-cdk). Refer [React CDK documentation](https://github.com/kadirahq/react-cdk)) to get started with the development.
+This project uses **npm** as its package manager. Please use `npm install` (not `yarn`) so that `package-lock.json` stays the single source of truth for the dependency tree.
+
+```sh
+npm install      # install dependencies
+npm test         # run the test suite
+npm run lint     # lint the source
+npm run build    # type-check and emit dist/ (JS + .d.ts)
+npm start        # run Storybook
+```
