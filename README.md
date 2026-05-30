@@ -3,7 +3,7 @@
 ## Demo
 https://github.com/donovanclarke/react-lottie
 
-## Wapper of bodymovin.js
+## Wrapper of bodymovin.js
 
 [bodymovin](https://github.com/bodymovin/bodymovin) is [Adobe After Effects](http://www.adobe.com/products/aftereffects.html) plugin for exporting animations as JSON, also it provide bodymovin.js for render them as svg/canvas/html.
 
@@ -28,6 +28,16 @@ Install through npm:
 ```
 npm install --save react-lottie-wrapper
 ```
+
+> **TypeScript:** Type definitions are bundled with the package — there is no need to install a separate `@types/...`. The exported types `LottieProps`, `LottieOptions`, and `LottieEventListener` are available from `react-lottie-wrapper`.
+
+## Exports
+
+The package exports three components:
+
+- **`Lottie`** — the modern hooks-based component (recommended).
+- **`ReactLottie`** — the legacy class-based component (deprecated, kept for back-compat).
+- **`ReactLottieWithRef`** — the legacy class component wrapped with `forwardRef`.
 
 ## Usage
 A react functional component example (React 16.8.0+).
@@ -108,7 +118,7 @@ export default class LottieControl extends Component {
 
     return (
       <>
-        <Lottie 
+        <ReactLottie
           options={defaultOptions}
           height={400}
           width={400}
@@ -116,20 +126,23 @@ export default class LottieControl extends Component {
           isPaused={isPaused}
         />
         <button
+          type="button"
           style={buttonStyle}
-          onClick={this.handleAnimationAction("stop", true)}
+          onClick={() => this.handleAnimationAction("stop", true)}
         >
           stop
         </button>
         <button
+          type="button"
           style={buttonStyle}
-          onClick={this.handleAnimationAction("play", false)}
+          onClick={() => this.handleAnimationAction("play", false)}
         >
           play
         </button>
-        <button 
+        <button
+          type="button"
           style={buttonStyle}
-          onClick={this.handleAnimationAction("pause")}
+          onClick={() => this.handleAnimationAction("pause")}
         >
           pause
         </button>
@@ -146,7 +159,7 @@ The `<Lottie /> and <ReactLottie />` Components supports the following propertie
 
 **animationData** *required*
 
-**rendererSettings** *required* 
+**rendererSettings** *optional* 
 
 Below are a the available options that are exposed through lottie-web,
 these options are available in react-lottie-wrapper.
@@ -176,15 +189,15 @@ You are given the option of either a `div` or `span` element.
 
 Insert inline styling for container.
 
-**className** *optional* [default: `""`]
+**className** *optional* [default: `null`]
 
 Insert class name for container.
 
-**loop** *optional* [default: `false`]
+**loop** *optional* [default: `true`]
 
 Should animation loop.
 
-**autoplay** *optional* [default: `false`]
+**autoplay** *optional* [default: `true`]
 
 Should animation begin to play automatically.
 
@@ -212,11 +225,19 @@ Pixel value for containers height.
 
 Set the speed of the animation (`normal === 1`).
 
-**role** *optional* [default: `button`]
+**direction** *optional*
+
+Set the direction of the animation. `1` plays forward, `-1` plays in reverse.
+
+**segments** *optional*
+
+Play a specific segment (or array of segments) of the animation, e.g. `[0, 50]`.
+
+**role** *optional* [default: `null`]
 
 **ariaLabel** *optional* [default: `animation`]
 
-**title** *optional* [default: `""`]
+**title** *optional* [default: `null`]
 
 **tabIndex** *optional* [default: `0`]
 
