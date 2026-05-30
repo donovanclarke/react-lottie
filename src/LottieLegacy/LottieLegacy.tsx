@@ -10,6 +10,30 @@ interface LottieRefStore {
   anim: AnimationItem | null;
 }
 
+// Fire the deprecation warning at most once per session.
+let hasWarnedDeprecation = false;
+
+function warnDeprecated() {
+  if (
+    hasWarnedDeprecation ||
+    typeof process === "undefined" ||
+    process.env.NODE_ENV === "production"
+  ) {
+    return;
+  }
+  hasWarnedDeprecation = true;
+  // eslint-disable-next-line no-console
+  console.warn(
+    "[react-lottie-wrapper] The class-based `ReactLottie` / `ReactLottieWithRef` " +
+      "components are deprecated and will be removed in v3. Migrate to the " +
+      "hooks-based `Lottie` export. See https://github.com/donovanclarke/react-lottie/blob/main/MIGRATION.md",
+  );
+}
+
+/**
+ * @deprecated Since v2.1. The class-based component will be removed in v3.
+ * Use the hooks-based {@link Lottie} export instead. See MIGRATION.md.
+ */
 class Lottie extends Component<LottieProps> {
   static defaultProps: Partial<LottieProps> = {
     renderAs: "div",
@@ -30,6 +54,8 @@ class Lottie extends Component<LottieProps> {
   };
 
   componentDidMount() {
+    warnDeprecated();
+
     const { options, eventListeners } = this.props;
     const { loop, autoplay, animationData, rendererSettings } = options;
 
@@ -212,6 +238,11 @@ class Lottie extends Component<LottieProps> {
   }
 }
 
+/**
+ * @deprecated Since v2.1. The class-based component will be removed in v3.
+ * Use the hooks-based {@link Lottie} export (which supports refs) instead.
+ * See MIGRATION.md.
+ */
 const LottieWithRef = React.forwardRef<Lottie, LottieProps>((props, ref) => (
   <Lottie {...props} ref={ref} />
 ));

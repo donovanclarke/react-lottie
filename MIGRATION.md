@@ -65,6 +65,14 @@ These are additive — no action required to upgrade from 2.0.
 - **Keyboard support** — when click-to-pause is enabled, the animation
   toggles on `Enter` / `Space` and exposes `role="button"`.
 
+### Deprecations
+
+- **`ReactLottie` and `ReactLottieWithRef` (the class-based API) are deprecated
+  as of 2.1 and will be removed in v3.** They now emit a one-time
+  development-only console warning and are marked `@deprecated` (so editors and
+  `tsc` flag their use). Migrate to the hooks-based `Lottie` export — it covers
+  the same props and adds an imperative `ref`.
+
 ### Note on `eventListeners`
 
 `eventListeners` is read when the animation is created or when its identity

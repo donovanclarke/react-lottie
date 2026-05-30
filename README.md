@@ -36,8 +36,12 @@ npm install --save react-lottie-wrapper
 The package exports three components:
 
 - **`Lottie`** — the modern hooks-based component (recommended).
-- **`ReactLottie`** — the legacy class-based component (deprecated, kept for back-compat).
-- **`ReactLottieWithRef`** — the legacy class component wrapped with `forwardRef`.
+- **`ReactLottie`** — the legacy class-based component. **Deprecated since v2.1; will be removed in v3.**
+- **`ReactLottieWithRef`** — the legacy class component wrapped with `forwardRef`. **Deprecated since v2.1; will be removed in v3.**
+
+> The legacy class components now emit a one-time deprecation warning in
+> development and are marked `@deprecated` for editors/TypeScript. New code
+> should use `Lottie` (it supports refs — see below). See [MIGRATION.md](./MIGRATION.md).
 
 ## Usage
 A react functional component example (React 16.8.0+).
